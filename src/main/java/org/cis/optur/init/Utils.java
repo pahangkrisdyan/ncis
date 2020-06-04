@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Utils {
+    private static Shift[] shifts;
     public static void pause(){
         Scanner n = new Scanner(System.in);
         String a = n.nextLine();
@@ -119,5 +120,37 @@ public class Utils {
 
     public static int getRandomIndex(double[] arr){
         return new Random().nextInt(arr.length);
+    }
+
+    public static int getMenitSetelah(String s){
+        Shift shift = getShift(s);
+        return 60-shift.getEndTimeMinutes();
+    }
+
+    private static Shift getShift(String s) {
+        for (Shift shift : shifts) {
+            if(shift.getName().equals(s))
+                return shift;
+        }
+        throw new Error("Not found shift with name" + s);
+    }
+
+    public static int getJamSetelah(String s) {
+        Shift shift = getShift(s);
+        return 24-shift.getEndTimeHours();
+    }
+
+    public static int getMenitSebelum(String s){
+        Shift shift = getShift(s);
+        return shift.getStartTimeMinutes();
+    }
+
+    public static int getJamSebelum(String s)  {
+        Shift shift = getShift(s);
+        return shift.getStartTimeHours();
+    }
+
+    public static void setShifts(Shift[] shifts) {
+        Utils.shifts = shifts;
     }
 }

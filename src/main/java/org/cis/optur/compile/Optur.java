@@ -1,7 +1,5 @@
 package org.cis.optur.compile;
 
-import fr.emse.ai.csp.optur.compile.model.*;
-import fr.emse.ai.csp.optur.compile.repository.*;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -32,6 +30,37 @@ public class Optur {
     public Optur() throws Exception {
         throw new Exception();
 //        chooseFile();
+    }
+
+    public Optur(File file) throws FileNotFoundException {
+        this.filePath = file.getAbsolutePath();
+        FileInputStream fis = new FileInputStream(file);
+        try {
+            this.wb = new HSSFWorkbook(fis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//compile employee
+        compileEmployee();
+
+//compile shift
+        compileShift();
+
+//compile manpowerplan
+        compileManpowerPlan();
+
+//compile hard constraint
+        compileHardConstraint();
+
+//compile soft constraint
+        compileSoftConstraint();
+
+//compile wanted shift pattern
+        compileWantedShiftPattern();
+
+//compile unwanted shift pattern
+        compileUnwantedShiftPattern();
     }
 
 

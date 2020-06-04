@@ -2,8 +2,6 @@ package org.cis.optur.init;
 
 import org.cis.optur.compile.model.Employee;
 import org.cis.optur.compile.model.Shift;
-import fr.emse.ai.util.Util;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,7 +16,7 @@ public class Engine2 {
     private int dayLength;
     private State state;
     public static int loopIndex = 0;
-    public Engine2(Employee[] employees, Shift[] shifts, int[][] mPNM, int dayLength) {
+    public Engine2(Employee[] employees, Shift[] shifts, int[][] mPNM, int dayLength) throws Exception {
 
         this.employees = employees;
         this.shifts = shifts;
@@ -72,24 +70,44 @@ public class Engine2 {
                     state.iEmployeePointer();
                 }
             }
-            if(isMatchMPNM()){
-                if(state.iDayPointer()){
-                    break;
-                }
+            if(isMatchMPNM()&&state.iDayPointer()){
+                break;
             }
         }
         done();
-//        hc3();
+        hc3();
+        hc6();
+    }
+
+    private void hc6() {
+        while (true){
+            System.out.println("Loop index = " + loopIndex);
+            while (true){
+                int minIndex = (int) Math.floor(Math.random()*dayLength);
+                int maxIndex = (int) Math.floor(Math.random()*dayLength);
+                if(tryToSwap(minIndex, maxIndex)){
+                    break;
+                }
+            }
+            if(isFeasible()){
+                break;
+            }
+        }
+
+
+        System.out.println("=================================================================================");
+        matrix.printMatrix();
+        System.out.println("=================================================================================");
     }
 
     private void hc3() {
         while (true){
+            System.out.println("Loop index = " + loopIndex);
             double[] employeesWeeklyAvg = new double[employees.length];
             double[] employeesWeeklyBaseLine = new double[employees.length];
             double[] employeesWeeklyDiff = new double[employees.length];
             double[] employeesWeeklyDiffP = new double[employees.length];
             double[] employeesWeeklyBaseLineP = new double[employees.length];
-
 
             //rata2 jam kerja existing employee tiap minggu nya, jadi tiap minggu di sum dulu, hasil sum nya jadi 1 item
             for (int i = 0; i < employeesWeeklyAvg.length; i++){
@@ -131,8 +149,6 @@ public class Engine2 {
                 System.out.format("%15d%15f%15f%15f%15f\n", i, employeesWeeklyBaseLine[i], employeesWeeklyAvg[i], employeesWeeklyDiff[i], employeesWeeklyBaseLineP[i]);
             }
             matrix.printMatrix();
-            System.out.println("==" +
-                    "===========================");
 
             while (true){
                 int minIndex = Utils.getRandomIndex(employeesWeeklyDiff);
@@ -140,8 +156,6 @@ public class Engine2 {
                 if(Math.abs(employeesWeeklyDiff[minIndex])<employeesWeeklyDiffP[minIndex])
                 if(employeesWeeklyDiff[minIndex]<employeesWeeklyDiff[maxIndex]){
                     if(tryToSwap(minIndex, maxIndex)){
-                        System.out.println("Swap E" + minIndex + " with E" + maxIndex);
-                        Utils.pause();
                         break;
                     }
                 }
@@ -150,9 +164,6 @@ public class Engine2 {
                 break;
             }
         }
-        System.out.println("=================================================================================");
-        matrix.printMatrix();
-        System.out.println("=================================================================================");
     }
 
 
@@ -393,13 +404,14 @@ public class Engine2 {
         hcTest.HC5Test();
     }
 
-    private boolean isFeasible() {
+    private boolean isFeasible()  {
         HcTest hcTest = new HcTest(matrix, mPNM, employees, shifts, shiftNames);
         try {
             hcTest.HC2Test();
             hcTest.HC4Test();
             hcTest.HC7Test();
             hcTest.HC5Test();
+            hcTest.HC6Test();
         }catch (Error e){
             if(e.getMessage().startsWith("HC")){
                 return false;

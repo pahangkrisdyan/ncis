@@ -5,16 +5,21 @@ import org.cis.optur.compile.model.Employee;
 import org.cis.optur.compile.model.ManpowerPlan;
 import org.cis.optur.compile.model.Shift;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 
 public class Main {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws Exception {
         Employee[] employees = {};
         Shift[] shifts = {};
         ManpowerPlan[] manpowerPlans = {};
         int[][] mPNM = {};
+        File opturFile = new File("");
         try {
-            Optur optur = new Optur("E:\\SEMESTER 8\\DATA\\OpTur (1)\\OpTur7.xls");
+            Optur optur = new Optur(opturFile);
 
             Object[] employeesRaw = optur.getEmployeeRepository().toArray();
             employees = new Employee[employeesRaw.length];
@@ -27,6 +32,8 @@ public class Main {
             for (int i = 0; i<shifts.length; i++){
                 shifts[i] = (Shift) shiftsRaw[i];
             }
+            
+            Utils.setShifts(shifts);
 
             Object[] manpowerPlansRaw = optur.getManpowerPlanRepository().toArray();
             manpowerPlans = new ManpowerPlan[manpowerPlansRaw.length];
@@ -51,7 +58,8 @@ public class Main {
             }
         }catch (Exception e){
             Engine2 engine2 = new Engine2(employees, shifts, mPNM, 42);
-            engine2.run();
         }
     }
+
+
 }

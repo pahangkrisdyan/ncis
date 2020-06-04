@@ -125,4 +125,62 @@ public class HcTest {
         }
         return -1;
     }
+
+    public void HC6Test(){
+        ee: for (int e = 0; e<matrix.getModel().length; e++){
+            ww : for (int w = 0; w<matrix.getModel()[0].length/7; w++){
+                if(isFreeBerurutanLebihDari1(matrix.getModel()[e], w))
+                    continue ww;
+                int jamMax = 0;
+                int menitMax = 0;
+                dd: for (int d = 0; d<7; d++){
+                    int jam = 0;
+                    int menit = 0;
+                    if(d==0){
+                        //awal
+                        jam+=24;
+                        jam+=Utils.getJamSebelum(matrix.getModel()[e][w*d+1]);
+                        menit+=Utils.getMenitSebelum(matrix.getModel()[e][w*d+1]);
+                    }else if (d==6){
+                        //akhir
+                        jam+=24;
+                        jam+=Utils.getJamSetelah(matrix.getModel()[e][w*d-1]);
+                        menit+=Utils.getMenitSetelah(matrix.getModel()[e][w*d-1]);
+                    }else {
+                        jam+=24;
+
+                        jam+=Utils.getJamSetelah(matrix.getModel()[e][w*d-1]);
+                        menit+=Utils.getMenitSetelah(matrix.getModel()[e][w*d-1]);
+
+                        jam+=Utils.getJamSebelum(matrix.getModel()[e][w*d+1]);
+                        menit+=Utils.getMenitSebelum(matrix.getModel()[e][w*d+1]);
+                    }
+                    while (menit>60){
+                        jam++;
+                        menit-=60;
+                    }
+                    if (jamMax<jam||(jamMax==jam&&menitMax<menit)){
+                        jamMax = jam;
+                        menitMax = menit;
+                    }
+                }
+                if(jamMax<Constants.CON_FREE)
+                    throw new Error("HC6 Belum terpennuhi! Work week " + w + ", employee ke " + e);
+            }
+        }
+    }
+
+
+
+    private boolean isFreeBerurutanLebihDari1(String[] strings, int w) {
+        String before = "";
+        for (String shiftName : strings) {
+            if (before.equals(Constants.FREE_SHIFT_NAME)&&shiftName.equals(Constants.FREE_SHIFT_NAME)){
+                return true;
+            }else {
+                before = shiftName;
+            }
+        }
+        return false;
+    }
 }
