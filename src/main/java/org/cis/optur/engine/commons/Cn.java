@@ -1,10 +1,9 @@
-package org.apache.commons;
+package org.cis.optur.engine.commons;
 
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 public class Cn {
-    public String [] constraint;
+    public String[] constraint;
     public boolean hc1; public  boolean hc2; public  double hc3; public  boolean hc4;
     public LocalTime hc5a; public LocalTime hc5b; public LocalTime hc5c; public LocalTime hc5d; public LocalTime hc5e; public LocalTime hc5f;
     public int hc6; public int hc7;

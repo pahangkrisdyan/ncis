@@ -1,4 +1,4 @@
-package org.apache.commons;
+package org.cis.optur.engine.commons;
 
 public class Pn {
     public int day; public String[] pattern;
@@ -10,7 +10,7 @@ public class Pn {
 
     public int getDay() {return day;}
 
-    public String [] getPatern() {
+    public String[] getPatern() {
         return pattern;
     }
 }

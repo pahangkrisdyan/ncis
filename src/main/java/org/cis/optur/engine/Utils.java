@@ -1,3 +1,5 @@
+package org.cis.optur.engine;
+
 public class Utils {
     public static int[][] getCopyOf(int[][] original){
         boolean a = original==null;

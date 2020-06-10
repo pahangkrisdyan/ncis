@@ -1,17 +1,17 @@
-package org.apache.commons;
+package org.cis.optur.engine.commons;
+
+import org.cis.optur.engine.commons.*;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Scanner;
 
 public class Sn {
     IterationListener iterationListener;
 
     int [][] solution;
     double penalty = 0.0D;
-
-
 
     public void setIterationListener(IterationListener iterationListener) {
         this.iterationListener = iterationListener;
@@ -344,110 +344,6 @@ public class Sn {
         return penalty9;
     }
 
-    public void tryToFeasible() {
-        int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-        int [][] newSolution = new int [solution.length][day];
-        Commons.copyArray(solution, newSolution);
-        double solutionHour = Commons.diffHour(solution);
-        int count = Commons.countHC6(solution);
-        for(int i =0; i<50000; i++)
-        {
-            int llh = (int) (Math.random()*3);
-            if(llh == 0)
-                Commons.twoExchange(newSolution);
-            if(llh == 1)
-                Commons.threeExchange(newSolution);
-            if(llh == 2)
-                Commons.doubleTwoExchange(newSolution);
-            if(Commons.validHC4Competence(newSolution))
-            {
-                if(Commons.validHC5(newSolution))
-                {
-                    if(Commons.validHC7(newSolution))
-                    {
-                        if(Commons.diffHour(newSolution)<=solutionHour)
-                        {
-                            if (Commons.countHC6(newSolution) <= count) {
-                                Commons.copyArray(newSolution, solution);
-                                count = Commons.countHC6(newSolution);
-                                solutionHour = Commons.diffHour(newSolution);
-                            }
-                            else {
-                                Commons.copyArray(solution, newSolution);
-                            }
-                        }
-                        else {
-                            Commons.copyArray(solution, newSolution);
-                        }
-                    }
-                    else {
-                        Commons.copyArray(solution, newSolution);
-                    }
-                }
-                else {
-                    Commons.copyArray(solution, newSolution);
-                }
-            }
-            else {
-                Commons.copyArray(solution, newSolution);
-            }
-//            System.out.println("Iterasi ke " + (i+1) + " " + solutionHour +  " hc6 " + Schedule.countHC6(solution));
-        }
-    }
-
-    public void hillClimbing () throws IOException {
-        for (int e = 0; e < 9; e++) {
-            int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-            int[][] newSolution = new int[solution.length][day];
-            int [][] baseSolution = new int [solution.length][day];
-            double penalty = countPenalty();
-            Commons.copyArray(solution, newSolution);
-            Commons.copyArray(solution, baseSolution);
-            double[][] plot = new double[101][2];
-            int p = 0;
-            long startTime = System.nanoTime();
-            for (int i = 0; i < 10000; i++) {
-                int llh = (int) (Math.random() * 3);
-                switch (llh) {
-                    case 0:
-                        Commons.twoExchange(solution);
-                    case 1:
-                        Commons.twoExchange(solution);
-                    case 2:
-                        Commons.doubleTwoExchange(solution);
-                }
-                if (Commons.validAll(solution) == 0) {
-                    if (countPenalty() <= penalty) {
-                        penalty = countPenalty();
-                        Commons.copyArray(solution, newSolution);
-                    } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                } else {
-                    Commons.copyArray(newSolution, solution);
-                }
-//                System.out.println("iterasi ke " + (i + 1) + " penalti : " + countPenalty());
-                if ((i + 1) % 10000 == 0) {
-                    plot[p][0] = i + 1;
-                    plot[p][1] = penalty;
-                    p = p + 1;
-                }
-            }
-
-            long endTime = System.nanoTime();
-            long time = (endTime-startTime) / 1000000000;
-            plot [100][0] = time;
-            Commons.saveOptimation(plot, e);
-            System.out.println(penalty);
-            Commons.copyArray(baseSolution, solution);
-//            for (int j = 0; j < plot.length; j++) {
-//                for (int k = 1; k < plot[j].length; k++) {
-//                    System.out.print(plot[j][k] + " ");
-//                }
-//                System.out.println();
-//            }
-        }
-    }
 
     public int countRF (int [] rf) {
         int index = -1000000;
@@ -474,377 +370,55 @@ public class Sn {
         return llh;
     }
 
-    public void reinforcementLearning1 () {
-        int p = 0;
-        int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-        int [][] newSolution = new int [solution.length][day];
-        double S = countPenalty();
-        double s = S;
-        double currPenalty; double bestPenalty;
-        currPenalty = bestPenalty = countPenalty();
-        Commons.copyArray(solution, newSolution);
-        double [] fitness = new double[200];
-        for (int i = 0; i < fitness.length; i++) {
-            fitness[i] = S;
-        }
-        int llh = -1;
-        int [] rf = {0, 0, 0};
-        double diff = 0;
-        double d = 0;
-        double prob = 0;
-        double TAwal = 10000000;
-        double coolingrate = 0.99995;
-        for (int i = 0; i < 1000000; i++) {
-//            llh = -1;
-            llh = countRF(rf);
-            if (llh == 0)
-                Commons.twoExchange(solution);
-            if (llh == 1)
-                Commons.threeExchange(solution);
-            if (llh == 2)
-                Commons.doubleTwoExchange(solution);
-            if (Commons.validAll(solution) == 0) {
-                diff = countPenalty() - currPenalty;
-                d = Math.abs(diff)/TAwal;
-                prob = Math.exp(-d);
-//                System.out.println("feasible");
-                if (countPenalty() <= currPenalty) {
-                    currPenalty = countPenalty();
-                    Commons.copyArray(solution, newSolution);
-                    if (currPenalty <= bestPenalty) {
-                        bestPenalty = currPenalty;
-                        Commons.copyArray(solution, newSolution);
-                        rf[llh] = rf[llh]+1;
-                    } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                } else {
-                    if (prob >= Math.random()) {
-//                        System.out.println("solusi jelek diterima");
-                        currPenalty = countPenalty();
-                        Commons.copyArray(solution, newSolution);
-                    } else {
-                        Commons.copyArray(newSolution, solution);
-                        rf[llh] = rf[llh] - 1;
-                    }
-                }
-            } else {
-                Commons.copyArray(newSolution, solution);
-                rf[llh] = rf[llh] - 1;
-            }
-            TAwal = TAwal * coolingrate;
-//            System.out.println(rf[llh]);
-//            System.out.println("Iterasi ke " + (i+1) + " s " + s);
-//            System.out.println("Iterasi : " + (i+1) +" suhu : " + TAwal + " diff : " + diff + " d : " + d + " prob : " + prob + " penalti : " + countPenalty());
-        }
-//        System.out.println(bestPenalty);
-    }
-
-    public void reinforcementLearning () throws IOException {
-        for (int e = 0; e < 3; e++) {
-            int[] score = {500, 500, 500};
-            int score2Exchange = score[0];
-            int score3Exchange = score[1];
-            int scoredoubleExchange = score[2];
-            int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-            int[][] newSolution = new int[Commons.emp.length][day];
-            int[][] baseSolution = new int[Commons.emp.length][day];
-            double penalty = countPenalty();
-            double[][] plot = new double[101][1];
-            int p = 0;
-            long startTime = System.nanoTime();
-            Commons.copyArray(solution, newSolution);
-            Commons.copyArray(solution, baseSolution);
-            for (int i = 0; i < 1000000; i++) {
-                double epsilon = 1 / (Math.sqrt(i));
-                if (Math.random() < epsilon) {
-                    int llh = (int) (Math.random() * 3);
-                    switch (llh) {
-                        case 0:
-                            Commons.twoExchange(solution);
-                        case 1:
-                            Commons.threeExchange(solution);
-                        case 2:
-                            Commons.doubleTwoExchange(solution);
-                    }
-                } else {
-                    if (score2Exchange > score3Exchange && score2Exchange > scoredoubleExchange) {
-                        Commons.twoExchange(solution);
-                        if (countPenalty() <= penalty) {
-                            if (score2Exchange < 1000) {
-                                score2Exchange = score2Exchange + 10;
-                            } else {
-                                score2Exchange = 1000;
-                            }
-                        } else {
-                            if (score2Exchange > 0) {
-                                score2Exchange = score2Exchange - 10;
-                            } else {
-                                score2Exchange = 0;
-                            }
-                        }
-                    }
-                    if (score3Exchange > score2Exchange && score3Exchange > scoredoubleExchange) {
-                        Commons.threeExchange(solution);
-                        if (countPenalty() <= penalty) {
-                            if (score3Exchange < 1000) {
-                                score3Exchange = score3Exchange + 10;
-                            } else {
-                                score3Exchange = 1000;
-                            }
-                        } else {
-                            if (score3Exchange > 0) {
-                                score3Exchange = score3Exchange - 10;
-                            } else {
-                                score3Exchange = 0;
-                            }
-                        }
-                    }
-                    if (scoredoubleExchange > score2Exchange && scoredoubleExchange > score3Exchange) {
-                        Commons.doubleTwoExchange(solution);
-                        if (countPenalty() <= penalty) {
-                            if (scoredoubleExchange < 1000) {
-                                scoredoubleExchange = scoredoubleExchange + 10;
-                            } else {
-                                scoredoubleExchange = 1000;
-                            }
-                        } else {
-                            if (scoredoubleExchange > 0) {
-                                scoredoubleExchange = scoredoubleExchange - 10;
-                            } else {
-                                scoredoubleExchange = 0;
-                            }
-                        }
-                    }
-                    if (score2Exchange == score3Exchange && score2Exchange == scoredoubleExchange) {
-                        if (Math.random() < 0.3) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (score2Exchange < 1000) {
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.3 && Math.random() < 0.6) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (score3Exchange < 1000) {
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.6) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (scoredoubleExchange < 1000) {
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score2Exchange == scoredoubleExchange && score2Exchange > score3Exchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (score2Exchange < 1000) {
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (scoredoubleExchange < 1000) {
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score2Exchange == score3Exchange && score2Exchange > scoredoubleExchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (score2Exchange < 1000) {
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (score3Exchange < 1000) {
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score3Exchange == scoredoubleExchange && score3Exchange > score2Exchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (score3Exchange < 1000) {
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= penalty) {
-                                if (scoredoubleExchange < 1000) {
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-//            System.out.println("2Exchange : " +score2Exchange+ "\t 3Exchange : " +score3Exchange+ "\t double : " +scoredoubleExchange);
-                if (Commons.validAll(solution) == 0) {
-                    if (countPenalty() <= penalty) {
-                        penalty = countPenalty();
-                        Commons.copyArray(solution, newSolution);
-                    } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                } else {
-                    Commons.copyArray(newSolution, solution);
-                }
-
-//                System.out.println("iterasi ke " + (i + 1) + " penalti : " + countPenalty());
-//            System.out.println("score2Exchange : " + score2Exchange + " score3Exchange : " + score3Exchange + " double : " + scoredoubleExchange);
-                if ((i + 1) % 10000 == 0) {
-                    plot[p][0] = penalty;
-                    p = p + 1;
-                }
-            }
-
-            long endTime = System.nanoTime();
-            long time = (endTime-startTime) / 1000000000;
-            plot [100][0] = time;
-            Commons.saveOptimation(plot, e);
-            System.out.println(penalty);
-            Commons.copyArray(baseSolution, solution);
-
-//            for (int j = 0; j < plot.length; j++) {
-//                for (int k = 0; k < plot[j].length; k++) {
-//                    System.out.print(plot[j][k] + " ");
-//                }
-//                System.out.println();
-//            }
-        }
-    }
-
-    public void simulatedAnnealing (int initialTemp, double coolingRate, int iteration) {
+    public OptimationResult SA2(int initialTemp, double coolingRate, int iteration, int penaltyRecordRange) {
         int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
         int [][] newSolution = new int [Commons.emp.length][day];
         Commons.copyArray(solution, newSolution);
         double bestPenalty; double currPenalty;
         bestPenalty = currPenalty = countPenalty();
+        int[][] bestSol = new int[newSolution.length][newSolution[0].length];
         double TAwal = initialTemp;
-        double diff = 0;
-        double d = 0;
+        double delta = 0;
+        double d;
         double prob = 0;
-        int p = 0;
-        double [][] plot = new double [100][4];
-//
+        LinkedList<Double> penalties = new LinkedList<>();
+        long startTime = System.currentTimeMillis();
         for (int i = 0; i < iteration; i++) {
-            int llh = (int) (Math.random() * 3);
+            int rand = (int) (Math.random() * 3);
+            int llh = rand;
             if (llh == 0)
+            {
                 Commons.twoExchange(solution);
-            if (llh == 1)
+            }
+            else if (llh == 1)
+            {
                 Commons.threeExchange(solution);
-            if (llh == 2)
+            }
+            else
+            {
                 Commons.doubleTwoExchange(solution);
-//            currPenalty = countPenalty();
-            int notValidHc = Commons.validAll(solution);
+            }
             if (Commons.validAll(solution) == 0) {
-                diff = countPenalty() - currPenalty;
-                d = Math.abs(diff)/TAwal;
+                delta = countPenalty() - currPenalty;
+                d = Math.abs(delta)/TAwal;
                 prob = Math.exp(-d);
-//                System.out.println("feasible");
                 if (countPenalty() <= currPenalty) {
                     currPenalty = countPenalty();
                     Commons.copyArray(solution, newSolution);
                     if (currPenalty <= bestPenalty) {
                         bestPenalty = currPenalty;
+                        Commons.copyArray(solution, bestSol);
                         Commons.copyArray(solution, newSolution);
                     } else {
-                        Commons.copyArray(newSolution, solution);
+                        if (prob >= Math.random()) {
+                            currPenalty = countPenalty();
+                            Commons.copyArray(solution, newSolution);
+                        } else {
+                            Commons.copyArray(newSolution, solution);
+                        }
                     }
                 } else {
                     if (prob >= Math.random()) {
-//                        System.out.println("solusi jelek diterima");
                         currPenalty = countPenalty();
                         Commons.copyArray(solution, newSolution);
                     } else {
@@ -855,36 +429,26 @@ public class Sn {
                 Commons.copyArray(newSolution, solution);
             }
             TAwal = TAwal * coolingRate;
-            System.out.println("Iterasi#" + (i+1) + /**" suhu : " + TAwal + " diff : " + diff + " d : " + d + " prob : " + prob + **/ "| penalti : " + countPenalty());
-            if ((i+1)%10000 == 0){
-                plot[p][0] = i+1;
-                plot[p][1] = TAwal;
-                plot[p][2] = currPenalty;
-                plot[p][3] = bestPenalty;
-                p = p+1;
+            if ((i+1)%penaltyRecordRange == 0){
+                Double penaltyTemp = countPenalty();
+                penalties.push(penaltyTemp);
+                System.out.println(penaltyTemp);
             }
         }
-        System.out.println(bestPenalty);
-//        for (int j = 0; j < plot.length; j++) {
-//            for (int k = 0; k < plot[j].length; k++) {
-//                System.out.print(plot[j][k] + " ");
-//            }
-//            System.out.println();
-//        }
+        long endTime = System.currentTimeMillis();
+        return new OptimationResult(penalties, endTime-startTime, bestSol, bestPenalty, Commons.file);
     }
 
-    public void simulatedAnnealingXTab(int initialTemp, double coolingRate, int iteration, int tabuListLength, int penaltyRecordRange) {
+    public OptimationResult T2(int iteration, int tabuListLength, int penaltyRecordRange) {
         int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
         int [][] newSolution = new int [Commons.emp.length][day];
         Commons.copyArray(solution, newSolution);
         double bestPenalty; double currPenalty;
         bestPenalty = currPenalty = countPenalty();
-        double TAwal = initialTemp;
-        double delta = 0;
-        double d;
-        double prob = 0;
+        int[][] bestSol = new int[newSolution.length][newSolution[0].length];
         LinkedList<Integer> tabuList = new LinkedList<>();
-        DecimalFormat df = new DecimalFormat("0.000");
+        LinkedList<Double> penalties = new LinkedList<>();
+        long startTime = System.currentTimeMillis();
         for (int i = 0; i < iteration; i++) {
             int rand;
             do {
@@ -893,60 +457,65 @@ public class Sn {
 
             int llh = rand;
             if (llh == 0)
+            {
                 Commons.twoExchange(solution);
-            if (llh == 1)
+            }
+            else if (llh == 1)
+            {
                 Commons.threeExchange(solution);
-            if (llh == 2)
+            }
+            else
+            {
                 Commons.doubleTwoExchange(solution);
-
-            int notValidHc = Commons.validAll(solution);
+            }
             if (Commons.validAll(solution) == 0) {
-                delta = countPenalty() - currPenalty;
-                d = Math.abs(delta)/TAwal;
-                prob = Math.exp(-d);
-
                 if (countPenalty() <= currPenalty) {
                     currPenalty = countPenalty();
                     Commons.copyArray(solution, newSolution);
                     if (currPenalty <= bestPenalty) {
                         bestPenalty = currPenalty;
+                        Commons.copyArray(solution, bestSol);
                         Commons.copyArray(solution, newSolution);
                     } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                } else {
-                    if (prob >= Math.random()) {
                         if(tabuList.size()==tabuListLength){
-                            tabuList.pop();
-                            tabuList.addFirst(llh);
+                            tabuList.pollLast();
+                            tabuList.offerFirst(llh);
                         }else {
-                            tabuList.addFirst(llh);
+                            tabuList.offerFirst(llh);
                         }
                         currPenalty = countPenalty();
                         Commons.copyArray(solution, newSolution);
-                    } else {
-                        Commons.copyArray(newSolution, solution);
                     }
+                } else {
+                    if(tabuList.size()==tabuListLength){
+                        tabuList.pollLast();
+                        tabuList.offerFirst(llh);
+                    }else {
+                        tabuList.offerFirst(llh);
+                    }
+                    currPenalty = countPenalty();
+                    Commons.copyArray(solution, newSolution);
                 }
             } else {
+                if(tabuList.size()==tabuListLength){
+                    tabuList.pollLast();
+                    tabuList.offerFirst(llh);
+                }else {
+                    tabuList.addFirst(llh);
+                }
                 Commons.copyArray(newSolution, solution);
             }
-            TAwal = TAwal * coolingRate;
-//            System.out.println("Iterasi#" + (i+1) + /**" suhu : " + TAwal + " diff : " + diff + " d : " + d + " prob : " + prob + **/ "| penalti : " + countPenalty());
             if ((i+1)%penaltyRecordRange == 0){
-                System.out.println("I: " + (i+1) + "\t| T: " + df.format(TAwal) + "\t| D: " + df.format(delta) + "\t| P: " + df.format(prob) + "\t| Y:" + df.format(countPenalty()));
+                Double penaltyTemp = countPenalty();
+                penalties.push(penaltyTemp);
+                System.out.println(penaltyTemp);
             }
         }
-        System.out.println(bestPenalty);
-//        for (int j = 0; j < plot.length; j++) {
-//            for (int k = 0; k < plot[j].length; k++) {
-//                System.out.print(plot[j][k] + " ");
-//            }
-//            System.out.println();
-//        }
+        long endTime = System.currentTimeMillis();
+        return new OptimationResult(penalties, endTime-startTime, bestSol, bestPenalty, Commons.file);
     }
 
-    public OptimationResult TSAR(int initialTemp, double coolingRate, int iteration, int tabuListLength, int penaltyRecordRange, int reheatRange, double reheatRate) {
+    public OptimationResult TSA2(int initialTemp, double coolingRate, int iteration, int tabuListLength, int penaltyRecordRange) {
         int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
         int [][] newSolution = new int [Commons.emp.length][day];
         Commons.copyArray(solution, newSolution);
@@ -959,7 +528,6 @@ public class Sn {
         double prob = 0;
         LinkedList<Integer> tabuList = new LinkedList<>();
         LinkedList<Double> penalties = new LinkedList<>();
-        DecimalFormat df = new DecimalFormat("0.000");
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iteration; i++) {
             int rand;
@@ -969,18 +537,21 @@ public class Sn {
 
             int llh = rand;
             if (llh == 0)
+            {
                 Commons.twoExchange(solution);
-            if (llh == 1)
+            }
+            else if (llh == 1)
+            {
                 Commons.threeExchange(solution);
-            if (llh == 2)
+            }
+            else
+            {
                 Commons.doubleTwoExchange(solution);
-
-            int notValidHc = Commons.validAll(solution);
+            }
             if (Commons.validAll(solution) == 0) {
                 delta = countPenalty() - currPenalty;
                 d = Math.abs(delta)/TAwal;
                 prob = Math.exp(-d);
-
                 if (countPenalty() <= currPenalty) {
                     currPenalty = countPenalty();
                     Commons.copyArray(solution, newSolution);
@@ -989,15 +560,26 @@ public class Sn {
                         Commons.copyArray(solution, bestSol);
                         Commons.copyArray(solution, newSolution);
                     } else {
-                        Commons.copyArray(newSolution, solution);
+                        if (prob >= Math.random()) {
+                            if(tabuList.size()==tabuListLength){
+                                tabuList.pollLast();
+                                tabuList.offerFirst(llh);
+                            }else {
+                                tabuList.offerFirst(llh);
+                            }
+                            currPenalty = countPenalty();
+                            Commons.copyArray(solution, newSolution);
+                        } else {
+                            Commons.copyArray(newSolution, solution);
+                        }
                     }
                 } else {
                     if (prob >= Math.random()) {
                         if(tabuList.size()==tabuListLength){
-                            tabuList.pop();
-                            tabuList.addFirst(llh);
+                            tabuList.pollLast();
+                            tabuList.offerFirst(llh);
                         }else {
-                            tabuList.addFirst(llh);
+                            tabuList.offerFirst(llh);
                         }
                         currPenalty = countPenalty();
                         Commons.copyArray(solution, newSolution);
@@ -1006,357 +588,77 @@ public class Sn {
                     }
                 }
             } else {
+                if(tabuList.size()==tabuListLength){
+                    tabuList.pollLast();
+                    tabuList.offerFirst(llh);
+                }else {
+                    tabuList.addFirst(llh);
+                }
                 Commons.copyArray(newSolution, solution);
             }
             TAwal = TAwal * coolingRate;
-//            System.out.println("Iterasi#" + (i+1) + /**" suhu : " + TAwal + " diff : " + diff + " d : " + d + " prob : " + prob + **/ "| penalti : " + countPenalty());
-            if((i+1)%reheatRange == 0){
-                TAwal = TAwal + (TAwal*reheatRate);
-                System.out.println("REHEAT!");
-            }
             if ((i+1)%penaltyRecordRange == 0){
                 Double penaltyTemp = countPenalty();
-                String fmtPenalty = df.format(countPenalty());
                 penalties.push(penaltyTemp);
-                System.out.println("I: " + (i+1) + "\t| T: " + df.format(TAwal) + "\t| D: " + df.format(delta) + "\t| P: " + df.format(prob) + "\t| Y:" + fmtPenalty);
+                System.out.println(penaltyTemp);
             }
         }
         long endTime = System.currentTimeMillis();
-        return new OptimationResult(penalties, endTime-startTime, bestSol, bestPenalty);
+        return new OptimationResult(penalties, endTime-startTime, bestSol, bestPenalty, Commons.file);
     }
 
-    public void simulatedAnnealingXTabuSearch (double initialTemp, double coolingRate, int iteration, int penaltiesRange) {
+    public OptimationResult TSAR2(int initialTemp, double coolingRate, int iteration, int tabuListLength, int penaltyRecordRange, double reHeatRate, int reHeatRange) {
         int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
         int [][] newSolution = new int [Commons.emp.length][day];
         Commons.copyArray(solution, newSolution);
         double bestPenalty; double currPenalty;
         bestPenalty = currPenalty = countPenalty();
+        int[][] bestSol = new int[newSolution.length][newSolution[0].length];
         double TAwal = initialTemp;
-        double coolingrate = coolingRate;
-        double diff = 0;
-        double d = 0;
+        double delta = 0;
+        double d;
         double prob = 0;
-        int p = 0;
-        double [][] plot = new double [100][4];
-        LinkedList<Double> penalties = new LinkedList<>();
         LinkedList<Integer> tabuList = new LinkedList<>();
-//
+        LinkedList<Double> penalties = new LinkedList<>();
+        long startTime = System.currentTimeMillis();
         for (int i = 0; i < iteration; i++) {
+            int rand;
+            do {
+                rand = (int) (Math.random() * 3);
+            }while (tabuList.contains(rand));
 
-            int llh = (int) (Math.random() * 3);
+            int llh = rand;
             if (llh == 0)
+            {
                 Commons.twoExchange(solution);
-            if (llh == 1)
+            }
+            else if (llh == 1)
+            {
                 Commons.threeExchange(solution);
-            if (llh == 2)
+            }
+            else
+            {
                 Commons.doubleTwoExchange(solution);
-//            currPenalty = countPenalty();
-            int notValidHc = Commons.validAll(solution);
+            }
             if (Commons.validAll(solution) == 0) {
-                diff = countPenalty() - currPenalty;
-                d = Math.abs(diff)/TAwal;
-                prob = Math.exp(-d);
-//                System.out.println("feasible");
+                delta = countPenalty() - currPenalty;
+                d = Math.abs(delta)/TAwal;
                 if (countPenalty() <= currPenalty) {
                     currPenalty = countPenalty();
                     Commons.copyArray(solution, newSolution);
                     if (currPenalty <= bestPenalty) {
                         bestPenalty = currPenalty;
+                        Commons.copyArray(solution, bestSol);
                         Commons.copyArray(solution, newSolution);
                     } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                } else {
-                    if (prob >= Math.random()) {
-//                        System.out.println("solusi jelek diterima");
-                        currPenalty = countPenalty();
-                        Commons.copyArray(solution, newSolution);
-                    } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                }
-            } else {
-                Commons.copyArray(newSolution, solution);
-            }
-            TAwal = TAwal * coolingrate;
-//            System.out.println("Iterasi : " + (i+1) + /**" suhu : " + TAwal + " diff : " + diff + " d : " + d + " prob : " + prob + **/ " penalti : " + countPenalty());
-            if ((i+1)%penaltiesRange == 0){
-//                plot[p][0] = i+1;
-//                plot[p][1] = TAwal;
-//                plot[p][2] = currPenalty;
-//                plot[p][3] = bestPenalty;
-//                p = p+1;
-                penalties.push(currPenalty);
-                System.out.println("Penalty => " + currPenalty);
-            }
-        }
-        System.out.println("Best: " + bestPenalty);
-//        System.out.println(bestPenalty);
-//        for (int j = 0; j < plot.length; j++) {
-//            for (int k = 0; k < plot[j].length; k++) {
-////                System.out.print(plot[j][k] + " ");
-//            }
-//            System.out.println();
-//        }
-    }
-
-    public void RL_SA () throws IOException {
-        for (int e = 0; e < 3; e++) {
-            int[] score = {500, 500, 500};
-            int score2Exchange = score[0];
-            int score3Exchange = score[1];
-            int scoredoubleExchange = score[2];
-            int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-            int[][] newSolution = new int[Commons.emp.length][day];
-            int[][] baseSolution = new int[Commons.emp.length][day];
-            double currPenalty;
-            double bestPenalty;
-            currPenalty = bestPenalty = countPenalty();
-            double TAwal = 10000000;
-            double coolingrate = 0.99995;
-            double diff = 0;
-            double prob = 0;
-            double penalty = countPenalty();
-            double[][] plot = new double[101][3];
-            int p = 0;
-            long startTime = System.nanoTime();
-            Commons.copyArray(solution, newSolution);
-            Commons.copyArray(solution, baseSolution);
-            for (int i = 0; i < 1000000; i++) {
-                double epsilon = 1 / (Math.sqrt(i));
-                if (Math.random() < epsilon) {
-                    int llh = (int) (Math.random() * 3);
-                    switch (llh) {
-                        case 0:
-                            Commons.twoExchange(solution);
-                        case 1:
-                            Commons.threeExchange(solution);
-                        case 2:
-                            Commons.doubleTwoExchange(solution);
-                    }
-                } else {
-                    if (score2Exchange > score3Exchange && score2Exchange > scoredoubleExchange) {
-                        Commons.twoExchange(solution);
-                        if (countPenalty() <= bestPenalty) {
-                            if (score2Exchange < 1000) {
-                                score2Exchange = score2Exchange + 10;
-                            } else {
-                                score2Exchange = 1000;
-                            }
-                        } else {
-                            if (score2Exchange > 0) {
-                                score2Exchange = score2Exchange - 10;
-                            } else {
-                                score2Exchange = 0;
-                            }
-                        }
-                    }
-                    if (score3Exchange > score2Exchange && score3Exchange > scoredoubleExchange) {
-                        Commons.threeExchange(solution);
-                        if (countPenalty() <= bestPenalty) {
-                            if (score3Exchange < 1000) {
-                                score3Exchange = score3Exchange + 10;
-                            } else {
-                                score3Exchange = 1000;
-                            }
-                        } else {
-                            if (score3Exchange > 0) {
-                                score3Exchange = score3Exchange - 10;
-                            } else {
-                                score3Exchange = 0;
-                            }
-                        }
-                    }
-                    if (scoredoubleExchange > score2Exchange && scoredoubleExchange > score3Exchange) {
-                        Commons.doubleTwoExchange(solution);
-                        if (countPenalty() <= bestPenalty) {
-                            if (scoredoubleExchange < 1000) {
-                                scoredoubleExchange = scoredoubleExchange + 10;
-                            } else {
-                                scoredoubleExchange = 1000;
-                            }
-                        } else {
-                            if (scoredoubleExchange > 0) {
-                                scoredoubleExchange = scoredoubleExchange - 10;
-                            } else {
-                                scoredoubleExchange = 0;
-                            }
-                        }
-                    }
-                    if (score2Exchange == score3Exchange && score2Exchange == scoredoubleExchange) {
-                        if (Math.random() < 0.3) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score2Exchange < 1000) {
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.3 && Math.random() < 0.6) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score3Exchange < 1000) {
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.6) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (scoredoubleExchange < 1000) {
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score2Exchange == scoredoubleExchange && score2Exchange > score3Exchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score2Exchange < 1000) {
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (scoredoubleExchange < 1000) {
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score2Exchange == score3Exchange && score2Exchange > scoredoubleExchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score2Exchange < 1000) {
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score3Exchange < 1000) {
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score3Exchange == scoredoubleExchange && score3Exchange > score2Exchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score3Exchange < 1000) {
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (scoredoubleExchange < 1000) {
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-//
-//            System.out.println("2Exchange : " +score2Exchange+ "\t 3Exchange : " +score3Exchange+ "\t double : " +scoredoubleExchange);
-//            System.out.println(currPenalty);
-//            System.out.println(countPenalty());
-
-//            System.out.println(prob);
-                if (Commons.validAll(solution) == 0) {
-                    diff = countPenalty() - currPenalty;
-                    prob = Math.exp(-(Math.abs(diff) / TAwal));
-//                System.out.println("feasible");
-                    if (countPenalty() <= currPenalty) {
-                        currPenalty = countPenalty();
-                        Commons.copyArray(solution, newSolution);
-                        if (currPenalty <= bestPenalty) {
-                            bestPenalty = currPenalty;
-                            Commons.copyArray(solution, newSolution);
-                        } else {
-                            Commons.copyArray(newSolution, solution);
-                        }
-                    } else {
+                        double r = Math.random();
                         if (prob >= Math.random()) {
+                            if(tabuList.size()==tabuListLength){
+                                tabuList.pollLast();
+                                tabuList.offerFirst(llh);
+                            }else {
+                                tabuList.offerFirst(llh);
+                            }
                             currPenalty = countPenalty();
                             Commons.copyArray(solution, newSolution);
                         } else {
@@ -1364,523 +666,40 @@ public class Sn {
                         }
                     }
                 } else {
-                    Commons.copyArray(newSolution, solution);
-                }
-                TAwal = TAwal * coolingrate;
-//                System.out.println("Iterasi : " + (i + 1) + /**" suhu : " + TAwal + " diff : " + diff +  " prob : " + prob + **/" penalti : " + countPenalty());
-                if ((i + 1) % 10000 == 0) {
-                    plot[p][0] = TAwal;
-                    plot[p][1] = currPenalty;
-                    plot[p][2] = bestPenalty;
-                    p = p + 1;
-                }
-            }
-
-            long endTime = System.nanoTime();
-            long time = (endTime-startTime) / 1000000000;
-            plot [100][0] = time;
-            Commons.saveOptimation(plot, e);
-//            System.out.println(penalty);
-            Commons.copyArray(baseSolution, solution);
-
-//            System.out.println(bestPenalty);
-//            for (int j = 0; j < plot.length; j++) {
-//                for (int k = 1; k < plot[j].length; k++) {
-//                    System.out.print(plot[j][k] + " ");
-//                }
-//                System.out.println();
-//            }
-        }
-    }
-
-    public static boolean stuck(double currPenalty, double previousCost, double currentStagnatCount) {
-        double diff = currPenalty - previousCost;
-        if (diff < 0.01) {
-            currentStagnatCount = currentStagnatCount + 1;
-        } else {
-            currentStagnatCount = 0;
-        }
-        if (currentStagnatCount > 5) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void SAR() {
-        int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-        int [][] newSolution = new int [Commons.emp.length][day];
-        int [][] bestSolution = new int [Commons.emp.length][day];
-        Commons.copyArray(solution, newSolution);
-        Commons.copyArray(solution, bestSolution);
-        double bestPenalty; double currPenalty;
-        bestPenalty = currPenalty = countPenalty();
-        double TAwal = 10000000; //countPenalty() * 0.01;
-        double coolingrate = 0.99995;
-        double diff = 0;
-        double d = 0;
-        double prob = 0;
-        double currentStagnantCount = 0;
-        double previousCost = countPenalty();
-        double stuckedBestCost = countPenalty();
-        double stuckedCurrentCost = countPenalty();
-        double [] prevCost = new double[1000000];
-
-        double heat = 0;
-        double[][] plot = new double[100][4];
-        int p = 0;
-//
-        for (int i = 0; i < 1000000; i++) {
-            int llh = (int) (Math.random() * 3);
-            if (llh == 0)
-                Commons.twoExchange(solution);
-            if (llh == 1)
-                Commons.threeExchange(solution);
-            if (llh == 2)
-                Commons.doubleTwoExchange(solution);
-//            currPenalty = countPenalty();
-            if (Commons.validAll(solution) == 0) {
-                diff = countPenalty() - currPenalty;
-                d = Math.abs(diff)/TAwal;
-                prob = Math.exp(-d);
-//                System.out.println("feasible");
-                if (countPenalty() <= currPenalty) {
-                    currPenalty = countPenalty();
-                    Commons.copyArray(solution, newSolution);
-                    if (currPenalty <= bestPenalty) {
-                        bestPenalty = currPenalty;
-                        Commons.copyArray(solution, newSolution);
-                        Commons.copyArray(solution, bestSolution);
-                    } else {
-                        Commons.copyArray(newSolution, solution);
-                    }
-                } else {
                     if (prob >= Math.random()) {
-//                        System.out.println("solusi jelek diterima");
+                        if(tabuList.size()==tabuListLength){
+                            tabuList.pollLast();
+                            tabuList.offerFirst(llh);
+                        }else {
+                            tabuList.offerFirst(llh);
+                        }
                         currPenalty = countPenalty();
                         Commons.copyArray(solution, newSolution);
                     } else {
                         Commons.copyArray(newSolution, solution);
-                    }
-                }
-                if (i > 0) {
-                    if (Math.abs(currPenalty - prevCost[i-1]) <= 0.01) {
-//                    System.out.println("stuck");
-                        currentStagnantCount = currentStagnantCount + 1;
-//                    System.out.println("stagnant " + currentStagnantCount);
-                        if (currentStagnantCount >= 10000) {
-                            Commons.copyArray(bestSolution, solution);
-                            if (bestPenalty == stuckedBestCost) {
-                                if (currPenalty - stuckedCurrentCost < 0.02) {
-                                    heat = heat + 1;
-                                } else {
-                                    heat = 0;
-                                }
-                            } else {
-                                heat = 0;
-                            }
-                            currentStagnantCount = 0;
-//                            System.out.println("heat " + heat);
-                            TAwal = (heat * 0.2 * currPenalty + currPenalty) * 0.01;
-                            stuckedBestCost = bestPenalty;
-                            stuckedCurrentCost = currPenalty;
-                        }
-                        heat = 0;
                     }
                 }
             } else {
+                if(tabuList.size()==tabuListLength){
+                    tabuList.pollLast();
+                    tabuList.offerFirst(llh);
+                }else {
+                    tabuList.addFirst(llh);
+                }
                 Commons.copyArray(newSolution, solution);
             }
-            TAwal = TAwal * coolingrate;
-//            System.out.println("Iterasi : " + (i+1) + /**" suhu : " + TAwal + " diff : " + diff + " d : " + d + " prob : " + prob + **/ " penalti : " + countPenalty());
-            if ((i+1)%10000 == 0) {
-                plot[p][0] = i+1;
-                plot[p][1] = TAwal;
-                plot[p][2] = currPenalty;
-                plot[p][3] = bestPenalty;
-                p = p+1;
+            TAwal = TAwal * coolingRate;
+            if((i+1)%reHeatRange == 0){
+                TAwal = TAwal + (TAwal*reHeatRate);
+                System.out.println("ReHeat!");
             }
-            prevCost[i] = currPenalty;
-        }
-//        System.out.println(bestPenalty);
-        for (int j = 0; j < plot.length; j++) {
-            for (int k = 0; k < plot[j].length; k++) {
-//                System.out.print(plot[j][k] + " ");
+            if ((i+1)%penaltyRecordRange == 0){
+                Double penaltyTemp = countPenalty();
+                penalties.push(penaltyTemp);
+                System.out.println(penaltyTemp);
             }
-//            System.out.println();
         }
-    }
-
-    public void RL_SAR() throws IOException {
-        for (int e = 0; e < 3; e++) {
-            int[] score = {500, 500, 500};
-            int score2Exchange = score[0];
-            int score3Exchange = score[1];
-            int scoredoubleExchange = score[2];
-            int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-            int[][] newSolution = new int[Commons.emp.length][day];
-            int[][] baseSolution = new int[Commons.emp.length][day];
-            double currPenalty;
-            double bestPenalty;
-            currPenalty = bestPenalty = countPenalty();
-            double TAwal = 10000000;
-            double coolingrate = 0.99995;
-            double diff = 0;
-            double prob = 0;
-            double d = 0;
-            double penalty = countPenalty();
-            Commons.copyArray(solution, newSolution);
-            Commons.copyArray(solution, baseSolution);
-            double stuckedBestCost = 0;
-            double stuckedCurrentCost = 0;
-            double currentStagnantCount = 0;
-            double heat = 0;
-            int reheating = 0;
-            double discountFactor = 0.9;
-//        double epsilon = 0.1;
-            double[] prevCost = new double[1000000];
-            double[][] plot = new double[101][3];
-            int p = 0;
-            long startTime = System.nanoTime();
-            for (int i = 0; i < 1000000; i++) {
-                double epsilon = 1 / (Math.sqrt(i));
-                if (Math.random() < epsilon) {
-                    int llh = (int) (Math.random() * 3);
-                    switch (llh) {
-                        case 0:
-                            Commons.twoExchange(solution);
-                        case 1:
-                            Commons.threeExchange(solution);
-                        case 2:
-                            Commons.doubleTwoExchange(solution);
-                    }
-                } else {
-                    if (score2Exchange > score3Exchange && score2Exchange > scoredoubleExchange) {
-                        Commons.twoExchange(solution);
-                        if (countPenalty() <= bestPenalty) {
-                            if (score2Exchange < 1000) {
-//                            score2Exchange = (score2Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                            score2Exchange = (i * score2Exchange + 10) / i;
-                                score2Exchange = score2Exchange + 10;
-                            } else {
-                                score2Exchange = 1000;
-                            }
-                        } else {
-                            if (score2Exchange > 0) {
-//                            score2Exchange = (score2Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                            score2Exchange = (i * score2Exchange - 10) / i;
-                                score2Exchange = score2Exchange - 10;
-                            } else {
-                                score2Exchange = 0;
-                            }
-                        }
-                    }
-                    if (score3Exchange > score2Exchange && score3Exchange > scoredoubleExchange) {
-                        Commons.threeExchange(solution);
-                        if (countPenalty() <= bestPenalty) {
-                            if (score3Exchange < 1000) {
-//                            score3Exchange = (score3Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                            score3Exchange = (i * score3Exchange + 10) / i;
-                                score3Exchange = score3Exchange + 10;
-                            } else {
-                                score3Exchange = 1000;
-                            }
-                        } else {
-                            if (score3Exchange > 0) {
-//                            score3Exchange = (score3Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                            score3Exchange = (i * score3Exchange - 10) / i;
-                                score3Exchange = score3Exchange - 10;
-                            } else {
-                                score3Exchange = 0;
-                            }
-                        }
-                    }
-                    if (scoredoubleExchange > score2Exchange && scoredoubleExchange > score3Exchange) {
-                        Commons.doubleTwoExchange(solution);
-                        if (countPenalty() <= bestPenalty) {
-                            if (scoredoubleExchange < 1000) {
-//                            scoredoubleExchange = (scoredoubleExchange + 10) * (int) (Math.pow(discountFactor, i));
-//                            scoredoubleExchange = (i * scoredoubleExchange + 10) / i;
-                                scoredoubleExchange = scoredoubleExchange + 10;
-                            } else {
-                                scoredoubleExchange = 1000;
-                            }
-                        } else {
-                            if (scoredoubleExchange > 0) {
-//                            scoredoubleExchange = (scoredoubleExchange - 10) * (int) (Math.pow(discountFactor, i));
-//                            scoredoubleExchange = (i * scoredoubleExchange - 10) / i;
-                                scoredoubleExchange = scoredoubleExchange - 10;
-                            } else {
-                                scoredoubleExchange = 0;
-                            }
-                        }
-                    }
-                    if (score2Exchange == score3Exchange && score2Exchange == scoredoubleExchange) {
-                        if (Math.random() < 0.3) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score2Exchange < 1000) {
-//                                score2Exchange = (score2Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                score2Exchange = (i * score2Exchange + 10) / i;
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-//                                score2Exchange = (score2Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                score2Exchange = (i * score2Exchange - 10) / i;
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.3 && Math.random() < 0.6) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score3Exchange < 1000) {
-//                                score3Exchange = (score3Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                score3Exchange = (i * score3Exchange + 10) / i;
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-//                                score3Exchange = (score3Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                score3Exchange = (i * score3Exchange - 10) / i;
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.6) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (scoredoubleExchange < 1000) {
-//                                scoredoubleExchange = (scoredoubleExchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                scoredoubleExchange = (i * scoredoubleExchange + 10) / i;
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-//                                scoredoubleExchange = (scoredoubleExchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                scoredoubleExchange = (i * scoredoubleExchange - 10) / i;
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score2Exchange == scoredoubleExchange && score2Exchange > score3Exchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score2Exchange < 1000) {
-//                                score2Exchange = (score2Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                score2Exchange = (i * score2Exchange + 10) / i;
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-//                                score2Exchange = (score2Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                score2Exchange = (i * score2Exchange - 10) / i;
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (scoredoubleExchange < 1000) {
-//                                scoredoubleExchange = (scoredoubleExchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                scoredoubleExchange = (i * scoredoubleExchange + 10) / i;
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-//                                scoredoubleExchange = (scoredoubleExchange -10) * (int) (Math.pow(discountFactor, i));
-//                                scoredoubleExchange = (i * scoredoubleExchange - 10) / i;
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score2Exchange == score3Exchange && score2Exchange > scoredoubleExchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.twoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score2Exchange < 1000) {
-//                                score2Exchange = (score2Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                score2Exchange = (i * score2Exchange + 10) / i;
-                                    score2Exchange = score2Exchange + 10;
-                                } else {
-                                    score2Exchange = 1000;
-                                }
-                            } else {
-                                if (score2Exchange > 0) {
-//                                score2Exchange = (score2Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                score2Exchange = (i * score2Exchange - 10) / i;
-                                    score2Exchange = score2Exchange - 10;
-                                } else {
-                                    score2Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score3Exchange < 1000) {
-//                                score3Exchange = (score3Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                score3Exchange = (i * score3Exchange + 10) / i;
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-//                                score3Exchange = (score3Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                score3Exchange = (i * score3Exchange - 10) / i;
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                    }
-                    if (score3Exchange == scoredoubleExchange && score3Exchange > score2Exchange) {
-                        if (Math.random() < 0.5) {
-                            Commons.threeExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (score3Exchange < 1000) {
-//                                score3Exchange = (score3Exchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                score3Exchange = (i * score3Exchange + 10) / i;
-                                    score3Exchange = score3Exchange + 10;
-                                } else {
-                                    score3Exchange = 1000;
-                                }
-                            } else {
-                                if (score3Exchange > 0) {
-//                                score3Exchange = (score3Exchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                score3Exchange = (i * score3Exchange - 10) / i;
-                                    score3Exchange = score3Exchange - 10;
-                                } else {
-                                    score3Exchange = 0;
-                                }
-                            }
-                        }
-                        if (Math.random() > 0.5) {
-                            Commons.doubleTwoExchange(solution);
-                            if (countPenalty() <= bestPenalty) {
-                                if (scoredoubleExchange < 1000) {
-//                                scoredoubleExchange = (scoredoubleExchange + 10) * (int) (Math.pow(discountFactor, i));
-//                                scoredoubleExchange = (i * scoredoubleExchange + 10) / i;
-                                    scoredoubleExchange = scoredoubleExchange + 10;
-                                } else {
-                                    scoredoubleExchange = 1000;
-                                }
-                            } else {
-                                if (scoredoubleExchange > 0) {
-//                                scoredoubleExchange = (scoredoubleExchange - 10) * (int) (Math.pow(discountFactor, i));
-//                                scoredoubleExchange = (i * scoredoubleExchange - 10) / i;
-                                    scoredoubleExchange = scoredoubleExchange - 10;
-                                } else {
-                                    scoredoubleExchange = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-                if (Commons.validAll(solution) == 0) {
-                    diff = countPenalty() - currPenalty;
-                    d = Math.abs(diff) / TAwal;
-                    prob = Math.exp(-d);
-//                System.out.println("feasible");
-                    if (countPenalty() <= currPenalty) {
-                        currPenalty = countPenalty();
-                        Commons.copyArray(solution, newSolution);
-                        if (currPenalty <= bestPenalty) {
-                            bestPenalty = currPenalty;
-                            Commons.copyArray(solution, newSolution);
-//                        Schedule.copyArray(solution, bestSolution);
-                        } else {
-                            Commons.copyArray(newSolution, solution);
-                        }
-                    } else {
-                        if (prob >= Math.random()) {
-//                        System.out.println("solusi jelek diterima");
-                            currPenalty = countPenalty();
-                            Commons.copyArray(solution, newSolution);
-                        } else {
-                            Commons.copyArray(newSolution, solution);
-                        }
-                    }
-                    if (i > 0 && reheating <= 5) {
-                        if (Math.abs(currPenalty - prevCost[i - 1]) <= 0.01) {
-//                    System.out.println("stuck");
-                            currentStagnantCount = currentStagnantCount + 1;
-//                    System.out.println("stagnant " + currentStagnantCount);
-                            if (currentStagnantCount >= 50000) {
-//                            Schedule.copyArray(bestSolution, solution);
-                                if (bestPenalty == stuckedBestCost) {
-                                    if (currPenalty - stuckedCurrentCost < 0.02) {
-                                        heat = heat + 1;
-                                    } else {
-                                        heat = 0;
-                                    }
-                                } else {
-                                    heat = 0;
-                                }
-                                currentStagnantCount = 0;
-//                            System.out.println("heat " + heat);
-                                TAwal = (heat * 0.2 * currPenalty + currPenalty) * 0.01;
-                                stuckedBestCost = bestPenalty;
-                                stuckedCurrentCost = currPenalty;
-                                reheating++;
-                            }
-                            heat = 0;
-                        }
-                    }
-                } else {
-                    Commons.copyArray(newSolution, solution);
-                }
-                TAwal = TAwal * coolingrate;
-//                System.out.println("Iterasi : " + (i + 1) + /**" suhu : " + TAwal + " diff : " + diff +  " prob : " + prob + **/" penalti : " + countPenalty());
-                if ((i + 1) % 10000 == 0) {
-                    plot[p][0] = TAwal;
-                    plot[p][1] = currPenalty;
-                    plot[p][2] = bestPenalty;
-                    p = p + 1;
-                }
-                prevCost[i] = currPenalty;
-            }
-
-            long endTime = System.nanoTime();
-            long time = (endTime-startTime) / 1000000000;
-            plot [100][0] = time;
-            Commons.saveOptimation(plot, e);
-//            System.out.println(penalty);
-            Commons.copyArray(baseSolution, solution);
-//            System.out.println(bestPenalty);
-//            for (int j = 0; j < plot.length; j++) {
-//                for (int k = 1; k < plot[j].length; k++) {
-//                    System.out.print(plot[j][k] + " ");
-//                }
-//                System.out.println();
-//            }
-        }
+        long endTime = System.currentTimeMillis();
+        return new OptimationResult(penalties, endTime-startTime, bestSol, bestPenalty, Commons.file);
     }
 }

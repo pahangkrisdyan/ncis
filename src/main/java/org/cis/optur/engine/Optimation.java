@@ -1,8 +1,6 @@
+package org.cis.optur.engine;
+import org.cis.optur.engine.commons.Sn;
 
-
-import org.apache.commons.Sn;
-
-import java.lang.reflect.Array;
 import java.util.LinkedList;
 
 public class Optimation {

@@ -1,4 +1,4 @@
-package org.apache.commons;
+package org.cis.optur.engine.commons;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -8,12 +8,28 @@ public class OptimationResult implements Serializable {
     private long time;
     private int[][] solution;
     private double bestPenalties;
+    private int opturNumber;
 
     public OptimationResult(LinkedList<Double> penalties, long time, int[][] solution, double bestPenalties) {
         this.penalties = penalties;
         this.time = time;
         this.solution = solution;
         this.bestPenalties = bestPenalties;
+    }
+    public OptimationResult(LinkedList<Double> penalties, long time, int[][] solution, double bestPenalties, int opturNumber) {
+        this.penalties = penalties;
+        this.time = time;
+        this.solution = solution;
+        this.bestPenalties = bestPenalties;
+        this.opturNumber = opturNumber;
+    }
+
+    public int getOpturNumber() {
+        return opturNumber;
+    }
+
+    public void setOpturNumber(int opturNumber) {
+        this.opturNumber = opturNumber;
     }
 
     public double getBestPenalties() {

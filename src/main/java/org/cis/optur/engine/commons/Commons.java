@@ -1,16 +1,15 @@
-package org.apache.commons;
+package org.cis.optur.engine.commons;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
-
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Scanner;
 
 public class Commons {
     public static IterationListener iterationListener;
@@ -21,8 +20,8 @@ public class Commons {
     public static Mp[] plan;
     public static Cn hard;
     public static Cn soft;
-    public static String [][] wanted;
-    public static String [][] unwanted;
+    public static String[][] wanted;
+    public static String[][] unwanted;
     public static Pn[] want;
     public static Pn[] unwant;
     public static Row row;
@@ -432,7 +431,7 @@ public class Commons {
                     index++;
                 }
             }
-            String [][] pattern = new String[soft.getSc8()][];
+            String[][] pattern = new String[soft.getSc8()][];
             index = 0;
             for (int i = 0; i < wanted.length; i++) {
                 pattern[index] = wanted[i][2].split(", |,");
@@ -472,7 +471,7 @@ public class Commons {
                     index++;
                 }
             }
-            String [][] pattern = new String[soft.getSc9()][];
+            String[][] pattern = new String[soft.getSc9()][];
             index = 0;
             for (int i = 0; i < unwanted.length; i++) {
                 pattern[index] = unwanted[i][2].split(", |,");
@@ -687,7 +686,7 @@ public class Commons {
                     index++;
                 }
             }
-            String [][] pattern = new String[soft.getSc8()][];
+            String[][] pattern = new String[soft.getSc8()][];
             index = 0;
             for (int i = 0; i < wanted.length; i++) {
                 pattern[index] = wanted[i][2].split(", |,");
@@ -727,7 +726,7 @@ public class Commons {
                     index++;
                 }
             }
-            String [][] pattern = new String[soft.getSc9()][];
+            String[][] pattern = new String[soft.getSc9()][];
             index = 0;
             for (int i = 0; i < unwanted.length; i++) {
                 pattern[index] = unwanted[i][2].split(", |,");
@@ -1005,7 +1004,7 @@ public class Commons {
         return initialSolutionResult;
     }
 
-    public static void optimization () throws IOException{
+    public static void optimization () throws IOException {
         int [][] matrixsol = new int [emp.length][planningHorizon[(file-1)] * 7];
         File file = new File(fileOptimization);
 
@@ -1014,13 +1013,13 @@ public class Commons {
         String readline = "";
         int index = 0;
         while ((readline = read.readLine()) != null) {
-            String [] tmp = readline.split(" ");
+            String[] tmp = readline.split(" ");
             for (int i = 0; i < matrixsol[index].length; i++) {
                 matrixsol[index][i] = Integer.parseInt(tmp[i]);
             } index++;
         }
         Sn sol = new Sn(matrixsol);
-        sol.RL_SAR();
+//        sol.RL_SAR();
 //        System.out.println(sol.countPenalty());
     }
 
@@ -1418,7 +1417,7 @@ public class Commons {
                         }
                         else
                         {
-                            LocalTime  lessthan  = LocalTime.parse("08:00");
+                            LocalTime lessthan  = LocalTime.parse("08:00");
                             LocalTime limit = LocalTime.parse("00:00");
                             LocalTime before = limit.minusHours(shiftxes[solution[j][i-1]-1].getFinish().getHour()).minusMinutes(shiftxes[solution[j][i-1]-1].getFinish().getMinute());
                             if(before.isAfter(lessthan))
@@ -1540,7 +1539,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
 //        System.out.println(last + " " + sidex);
         last = 0;
         for (int i = first; i <= sheet.getLastRowNum(); i++) {
@@ -1575,7 +1574,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
 //        System.out.println(lasta + " " + sidex);
         last = 0;
         for (int i = first-1; i <= sheet.getLastRowNum(); i++) {
@@ -1611,7 +1610,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
         //System.out.println(last + " " + sidex);
         last = 0;
         for (int i = first; i <= sheet.getLastRowNum(); i++) {
@@ -1647,7 +1646,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
 //        System.out.println(last + " " + sidex);
         last = 0;
         for (int i = first-1; i <= 15; i++) {
@@ -1661,7 +1660,7 @@ public class Commons {
             last++;
         }
 
-        String [] cons = new String[data.length];
+        String[] cons = new String[data.length];
         for (int i = 0; i < data.length; i++) {
             cons[i] = data[i][3];
         }
@@ -1688,7 +1687,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
 //        System.out.println(last + " " + sidex);
         last = 0;
         for (int i = first+13; i <= sheet.getLastRowNum(); i++) {
@@ -1701,7 +1700,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [] cons = new String[data.length];
+        String[] cons = new String[data.length];
         for (int i = 0; i < data.length; i++) {
             cons[i] = data[i][3];
         }
@@ -1728,7 +1727,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
 //        System.out.println(last + " " + sidex);
         last = 0;
         for (int i = first-1; i <= 12; i++) {
@@ -1777,7 +1776,7 @@ public class Commons {
             side = 0;
             last++;
         }
-        String [][] data = new String[last][sidex];
+        String[][] data = new String[last][sidex];
 //        System.out.println(last + " " + sidex);
         last = 0;
         for (int i = first+12; i <= sheet.getLastRowNum(); i++) {
