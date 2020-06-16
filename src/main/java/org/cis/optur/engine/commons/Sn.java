@@ -10,26 +10,14 @@ import java.util.Scanner;
 public class Sn {
     IterationListener iterationListener;
 
-    int [][] solution;
-    double penalty = 0.0D;
+    public int [][] solution;
+    public double penalty = 0.0D;
 
-    public void setIterationListener(IterationListener iterationListener) {
-        this.iterationListener = iterationListener;
-    }
 
     public Sn(int [][] solution) {
         this.solution = solution;
         this.penalty = penalty1() + penalty2() + penalty3() + penalty4() + penalty5() +
                 penalty6() + penalty7() + penalty8() + penalty9();
-    }
-
-    public Sn(double penalty) {
-        this.penalty = penalty;
-    }
-
-    public Sn(int [][] solution, double penalty) {
-        this.solution = solution;
-        this.penalty = penalty;
     }
 
     public int[][] getSolution(){
@@ -370,6 +358,39 @@ public class Sn {
         return llh;
     }
 
+    public OptimationResult HC2(int iteration, int penaltyRecordRange) {
+        int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
+        int [][] bestSolution = new int [Commons.emp.length][day];
+        double bestPenalty = countPenalty();
+        LinkedList<Double> penalties = new LinkedList<>();
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < iteration; i++) {
+            int[][] backupSol = new int [Commons.emp.length][day];
+            Commons.copyArray(solution, backupSol);
+            int rand = (int) (Math.random() * 3);
+            int llh = rand;
+
+            if (llh == 0) Commons.twoExchange(solution);
+            else if (llh == 1) Commons.threeExchange(solution);
+            else Commons.doubleTwoExchange(solution);
+
+            double currPenalty = countPenalty();
+            if (Commons.validAll(solution) == 0 && bestPenalty > currPenalty ) {
+                bestPenalty = currPenalty;
+                Commons.copyArray(solution, bestSolution);
+            }else {
+                Commons.copyArray(backupSol, solution);
+            }
+            if ((i+1)%penaltyRecordRange == 0){
+                Double penaltyTemp = countPenalty();
+                penalties.push(penaltyTemp);
+                System.out.println(penaltyTemp);
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        return new OptimationResult(penalties, endTime-startTime, bestSolution, bestPenalty, Commons.file);
+    }
+
     public OptimationResult SA2(int initialTemp, double coolingRate, int iteration, int penaltyRecordRange) {
         int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
         int [][] newSolution = new int [Commons.emp.length][day];
@@ -600,7 +621,7 @@ public class Sn {
             if ((i+1)%penaltyRecordRange == 0){
                 Double penaltyTemp = countPenalty();
                 penalties.push(penaltyTemp);
-                System.out.println(penaltyTemp);
+//                System.out.println(penaltyTemp);
             }
         }
         long endTime = System.currentTimeMillis();
@@ -643,6 +664,7 @@ public class Sn {
             if (Commons.validAll(solution) == 0) {
                 delta = countPenalty() - currPenalty;
                 d = Math.abs(delta)/TAwal;
+                prob = Math.exp(-d);
                 if (countPenalty() <= currPenalty) {
                     currPenalty = countPenalty();
                     Commons.copyArray(solution, newSolution);
@@ -651,7 +673,6 @@ public class Sn {
                         Commons.copyArray(solution, bestSol);
                         Commons.copyArray(solution, newSolution);
                     } else {
-                        double r = Math.random();
                         if (prob >= Math.random()) {
                             if(tabuList.size()==tabuListLength){
                                 tabuList.pollLast();
@@ -696,7 +717,7 @@ public class Sn {
             if ((i+1)%penaltyRecordRange == 0){
                 Double penaltyTemp = countPenalty();
                 penalties.push(penaltyTemp);
-                System.out.println(penaltyTemp);
+//                System.out.println(penaltyTemp);
             }
         }
         long endTime = System.currentTimeMillis();

@@ -5,12 +5,13 @@ import org.cis.optur.engine.commons.Commons;
 import org.cis.optur.engine.commons.InitialSolutionResult;
 import org.cis.optur.engine.commons.OptimationResult;
 import org.cis.optur.engine.commons.Sn;
+import org.cis.optur.optimation.TabuSearch;
 
 import java.io.*;
 import java.text.ParseException;
 import java.util.Collections;
 
-public class T {
+public class TS {
     static SP sp = new SP(1000000, 0, 0.0, 0.0, 0, 1);
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7.xls
     static final String XLS_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7.xls";
@@ -52,12 +53,13 @@ public class T {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Sn sn = new Sn(initialSol.getInitialSolution());
-
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10; i++) {
+            int[][] temp = new int[initialSol.getInitialSolution().length][initialSol.getInitialSolution()[0].length];
+            Commons.copyArray(initialSol.getInitialSolution(), temp);
+            TabuSearch tabuSearch = new TabuSearch(temp);
             System.out.println("Start Percobaan " + (i+1));
             OptimationResult optimationResult;
-            optimationResult = sn.T2(sp.iterasi,sp.TL, 5000);
+            optimationResult = tabuSearch.T2(sp.iterasi,sp.TL, 5000);
             try {
                 File dir = new File(RESULT_FOLDER);
                 if (!dir.exists()){

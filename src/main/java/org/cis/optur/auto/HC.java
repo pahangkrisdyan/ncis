@@ -5,21 +5,21 @@ import org.cis.optur.engine.commons.Commons;
 import org.cis.optur.engine.commons.InitialSolutionResult;
 import org.cis.optur.engine.commons.OptimationResult;
 import org.cis.optur.engine.commons.Sn;
-import org.cis.optur.optimation.SimulatetAneling;
+import org.cis.optur.optimation.HillClimbing;
 
 import java.io.*;
 import java.text.ParseException;
 import java.util.Collections;
 
-public class SA {
+public class HC {
     static SP sp = new SP(1000000, 1000000, 0.99998, 0.0, 0, 0);
 
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7.xls
-    static final String XLS_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7.xls";
+    static final String XLS_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5.xls";
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7\Optur7.sol
-    static final String INIT_SOL_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7\\Optur7.sol";
+    static final String INIT_SOL_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5\\Optur5.sol";
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7
-    static final String RESULT_FOLDER = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7\\SA";
+    static final String RESULT_FOLDER = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5\\HC";
 
     public static void main(String[] args) throws ParseException, InvalidFormatException, IOException, ClassNotFoundException {
         Commons.initSC(new File(XLS_FILE_PATH));
@@ -59,10 +59,10 @@ public class SA {
         for (int i = 0; i < 10; i++) {
             int[][] temp = new int[initialSol.getInitialSolution().length][initialSol.getInitialSolution()[0].length];
             Commons.copyArray(initialSol.getInitialSolution(), temp);
-            SimulatetAneling simulatetAneling = new SimulatetAneling(temp);
+            HillClimbing hillClimbing = new HillClimbing(temp);
             System.out.println("Start Percobaan " + (i+1));
             OptimationResult optimationResult;
-            optimationResult = simulatetAneling.getOptimationResult(sp.TO, sp.a, sp.iterasi, 5000);
+            optimationResult = hillClimbing.getOptimationResult(sp.iterasi, 5000);
             try {
                 File dir = new File(RESULT_FOLDER);
                 if (!dir.exists()){

@@ -5,6 +5,8 @@ import org.cis.optur.engine.commons.Commons;
 import org.cis.optur.engine.commons.InitialSolutionResult;
 import org.cis.optur.engine.commons.OptimationResult;
 import org.cis.optur.engine.commons.Sn;
+import org.cis.optur.optimation.TSXSA;
+import org.cis.optur.optimation.TSXTSAR;
 
 import java.io.*;
 import java.text.ParseException;
@@ -12,10 +14,11 @@ import java.util.Collections;
 
 public class TSATSAR {
     static SP[] sps = {
-            new SP(1000000, 1000000, 0.99998, 0.0, 0, 1),//A
-            new SP(1000000, 1000000, 0.88889, 0.0, 0, 1),//B
-            new SP(1000000, 1000000, 0.99998, 0.0, 0, 2),//C
-            new SP(1000000, 500000, 0.99998, 0.0, 0, 2),//D
+//            new SP(1000000, 1000000, 0.99998, 0.0, 0, 1),//A
+//            new SP(1000000, 1000000, 0.88889, 0.0, 0, 1),//B
+//            new SP(1000000, 1000000, 0.99998, 0.0, 0, 2),//C
+//            new SP(1500000, 1000000, 0.99998, 0.0, 0, 2),//C
+//            new SP(1000000, 500000, 0.99998, 0.0, 0, 2),//D
             new SP(1000000, 1000000, 0.99998, 0.1, 500000, 1),//E
             new SP(1000000, 1000000, 0.88889, 0.1, 500000, 1),//F
             new SP(1000000, 1000000, 0.88889, 0.5, 500000, 1),//G
@@ -24,11 +27,11 @@ public class TSATSAR {
             new SP(1000000, 500000, 0.99998, 0.1, 500000, 2)//J
     };
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7.xls
-    static final String XLS_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7.xls";
+    static final String XLS_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5.xls";
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7\Optur7.sol
-    static final String INIT_SOL_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7\\Optur7.sol";
+    static final String INIT_SOL_FILE_PATH = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5\\Optur5.sol";
     //example C:\Users\5216100056\Desktop\OpTur (1)\Optur7
-    static final String RESULT_FOLDER = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7";
+    static final String RESULT_FOLDER = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5";
 
     public static void main(String[] args) throws ParseException, InvalidFormatException, IOException, ClassNotFoundException {
         Commons.initSC(new File(XLS_FILE_PATH));
@@ -58,17 +61,20 @@ public class TSATSAR {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Sn sn = new Sn(initialSol.getInitialSolution());
         for (int s = 0; s < sps.length; s++) {
-            //TODO: AAAAA
             System.out.println("Start Scenario " + (s+1));
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 10; i++) {
+                int[][] temp = new int[initialSol.getInitialSolution().length][initialSol.getInitialSolution()[0].length];
+                Commons.copyArray(initialSol.getInitialSolution(), temp);
+
                 System.out.println("Start Percobaan " + (i+1));
                 OptimationResult optimationResult;
                 if(sps[s].b==0){
-                    optimationResult = sn.TSA2(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000);
+                    TSXSA tsxsa = new TSXSA(temp);
+                    optimationResult = tsxsa.TSA2(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000);
                 }else {
-                    optimationResult = sn.TSAR2(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000, sps[s].b, sps[s].Nb);
+                    TSXTSAR tsxtsar = new TSXTSAR(temp);
+                    optimationResult = tsxtsar.getOptimationResult(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000, sps[s].b, sps[s].Nb);
                 }
                 try {
                     File dir = new File(RESULT_FOLDER + "\\S"+(s+1));

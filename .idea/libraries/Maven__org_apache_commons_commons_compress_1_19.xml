@@ -3,9 +3,7 @@
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-compress/1.19/commons-compress-1.19.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-compress/1.19/commons-compress-1.19-javadoc.jar!/" />
-    </JAVADOC>
+    <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-compress/1.19/commons-compress-1.19-sources.jar!/" />
     </SOURCES>
