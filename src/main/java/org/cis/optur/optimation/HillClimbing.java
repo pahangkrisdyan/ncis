@@ -1,5 +1,5 @@
 package org.cis.optur.optimation;
-import org.cis.optur.engine.commons.Commons;
+import org.cis.optur.engine.commons.Utils;
 import org.cis.optur.engine.commons.OptimationResult;
 import org.cis.optur.engine.commons.Sn;
 
@@ -12,35 +12,35 @@ public class HillClimbing extends Sn{
     }
 
     public OptimationResult getOptimationResult(int iteration, int penaltyRecordRange) {
-        int day = Commons.planningHorizon[(Commons.file - 1)] * 7;
-        int [][] bestSolution = new int [Commons.emp.length][day];
-        double bestPenalty = countPenalty();
+        int dayLength = Utils.manpowerPlan[(Utils.file - 1)] * 7;
+        int [][] bestSolutionMatrix = new int [Utils.employees.length][dayLength];
+        double bestPenalty = getCandidatePenalty();
         LinkedList<Double> penalties = new LinkedList<>();
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iteration; i++) {
-            int[][] backupSol = new int [Commons.emp.length][day];
-            Commons.copyArray(solution, backupSol);
-            int rand = (int) (Math.random() * 3);
-            int llh = rand;
+            int[][] backupSolutionMatrix = new int [Utils.employees.length][dayLength];
+            Utils.copySolutionMatrix(solutionMatrix, backupSolutionMatrix);
+            int randomInt = (int) (Math.random() * 3);
+            int llh = randomInt;
 
-            if (llh == 0) Commons.twoExchange(solution);
-            else if (llh == 1) Commons.threeExchange(solution);
-            else Commons.doubleTwoExchange(solution);
+            if (llh == 0) Utils.twoExchange(solutionMatrix);
+            else if (llh == 1) Utils.threeExchange(solutionMatrix);
+            else Utils.doubleTwoExchange(solutionMatrix);
 
-            double currPenalty = countPenalty();
-            if (Commons.validAll(solution) == 0 && bestPenalty > currPenalty ) {
-                bestPenalty = currPenalty;
-                Commons.copyArray(solution, bestSolution);
+            double currentPenalty = getCandidatePenalty();
+            if (Utils.isFeasibleAllHC(solutionMatrix) == 0 && bestPenalty > currentPenalty ) {
+                bestPenalty = currentPenalty;
+                Utils.copySolutionMatrix(solutionMatrix, bestSolutionMatrix);
             }else {
-                Commons.copyArray(backupSol, solution);
+                Utils.copySolutionMatrix(backupSolutionMatrix, solutionMatrix);
             }
             if ((i+1)%penaltyRecordRange == 0){
-                Double penaltyTemp = countPenalty();
+                Double penaltyTemp = getCandidatePenalty();
                 penalties.push(penaltyTemp);
                 System.out.println(penaltyTemp);
             }
         }
         long endTime = System.currentTimeMillis();
-        return new OptimationResult(penalties, endTime-startTime, bestSolution, bestPenalty, Commons.file);
+        return new OptimationResult(penalties, endTime-startTime, bestSolutionMatrix, bestPenalty, Utils.file);
     }
 }

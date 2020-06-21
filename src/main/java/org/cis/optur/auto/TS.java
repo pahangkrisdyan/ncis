@@ -1,10 +1,9 @@
 package org.cis.optur.auto;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.cis.optur.engine.commons.Commons;
+import org.cis.optur.engine.commons.Utils;
 import org.cis.optur.engine.commons.InitialSolutionResult;
 import org.cis.optur.engine.commons.OptimationResult;
-import org.cis.optur.engine.commons.Sn;
 import org.cis.optur.optimation.TabuSearch;
 
 import java.io.*;
@@ -21,7 +20,7 @@ public class TS {
     static final String RESULT_FOLDER = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur7\\T";
 
     public static void main(String[] args) throws ParseException, InvalidFormatException, IOException, ClassNotFoundException {
-        Commons.initSC(new File(XLS_FILE_PATH));
+        Utils.initSC(new File(XLS_FILE_PATH));
         File solFile = new File(INIT_SOL_FILE_PATH);
         FileInputStream fi = new FileInputStream(solFile);
         ObjectInputStream oi = new ObjectInputStream(fi);
@@ -55,11 +54,11 @@ public class TS {
         }
         for (int i = 0; i < 10; i++) {
             int[][] temp = new int[initialSol.getInitialSolution().length][initialSol.getInitialSolution()[0].length];
-            Commons.copyArray(initialSol.getInitialSolution(), temp);
+            Utils.copySolutionMatrix(initialSol.getInitialSolution(), temp);
             TabuSearch tabuSearch = new TabuSearch(temp);
             System.out.println("Start Percobaan " + (i+1));
             OptimationResult optimationResult;
-            optimationResult = tabuSearch.T2(sp.iterasi,sp.TL, 5000);
+            optimationResult = tabuSearch.getOptimationResult(sp.iterasi,sp.TL, 5000);
             try {
                 File dir = new File(RESULT_FOLDER);
                 if (!dir.exists()){

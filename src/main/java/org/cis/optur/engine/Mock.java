@@ -1,96 +1,95 @@
 package org.cis.optur.engine;
 
 
-import org.cis.optur.engine.commons.Commons;
+import org.cis.optur.engine.commons.Utils;
 import org.cis.optur.engine.commons.InitialSolutionResult;
-import org.cis.optur.engine.commons.OptimationResult;
 import org.cis.optur.engine.commons.Sn;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
 import java.io.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class Mock {
 
-//    static JTextArea logsArea;
-//
-//    static JScrollBar vertical;
-//
-//    static File fileOptur;
-//
-//    static JFileChooser fileChooserOpenOptur;
-//
-//    static JFileChooser fileChooserSaveSol;
-//
-//    static JFrame jFrame;
+    static JTextArea logsArea;
+
+    static JScrollBar vertical;
+
+    static File fileOptur;
+
+    static JFileChooser fileChooserOpenOptur;
+
+    static JFileChooser fileChooserSaveSol;
+
+    static JFrame jFrame;
 //public static Logger logger= Logger.getLogger("global");
-//    public static void main(String[] args) throws Exception {
-//        //Initial
-//        String[] options = {"Buat Initial Solution", "Optimasi"};
-//
-//        int option = JOptionPane.showOptionDialog(null, "Mau ngapain mbak?",
-//                "NCIS'S TA",
-//                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
-//
-//        if(option==0){
-//            AtomicBoolean repeat = new AtomicBoolean(false);
-//            doIt: do {
-//                repeat.set(false);
-//                JFileChooser j = new JFileChooser("e:");
-//                FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel", "xls", "excel");
-//                j.setFileFilter(filter);
-//                int result = j.showOpenDialog(null);
-//                if (result == JFileChooser.APPROVE_OPTION) {
-//                    Commons.exceptionListener = e -> {
-//                        JOptionPane.showMessageDialog(null, "Program Error");
-//                    };
-//                    Commons.feasibilityListener = hc -> {
-//                        JOptionPane.showMessageDialog(null, "Not Feasible " + hc);
-//                        repeat.set(true);
-//                    };
-//
-//                    Commons.iterationListener = count -> {
-//                        System.out.println("Iteration => " + count);
-//                    };
-//
-//                    if(repeat.get()) continue ;
-//                    File opturFile = j.getSelectedFile();
-//                    InitialSolutionResult initialSol = Commons.getInitialSolutionResult(opturFile);
-//                    String[] options2 = {"Save Yeay", "Jelek Run Lagi"};
-//                    Sn sn = new Sn(initialSol.getInitialSolution());
-//                    int option2 = JOptionPane.showOptionDialog(null, "Penalty = "+sn.countPenalty()+" | Gimana mbak?",
-//                            "NCIS'S TA",
-//                            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options2, options2[0]);
-//                    if(option2==0){
-//                        JFileChooser fileChooserSaveSol = new JFileChooser();
-//                        fileChooserSaveSol.setDialogTitle("Specify a file to save");
-//                        int userSelection = fileChooserSaveSol.showSaveDialog(null);
-//
-//                        File fileToSave = null;
-//
-//                        if (userSelection == JFileChooser.APPROVE_OPTION) {
-//                            fileToSave = fileChooserSaveSol.getSelectedFile();
-//                        }
-//                        FileOutputStream f = new FileOutputStream(fileToSave);
-//                        ObjectOutputStream o = new ObjectOutputStream(f);
-//                        o.writeObject(initialSol);
-//                        o.close();
-//                        f.close();
-//                        String[] options4 = {"Run Lagi", "Udah"};
-//                        int option4 = JOptionPane.showOptionDialog(null, "Udah ke save yaa, jangan lupa dimana nyimpennya tadi.",
-//                                "NCIS'S TA",
-//                                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options4, options4[0]);
-//                        if (option4==0) repeat.set(true);
-//                        else System.exit(0);
-//                    }else {
-//                        repeat.set(true);
-//                    }
-//                }
-//            }while (repeat.get());
-//        }else {
+    public static void main(String[] args) throws Exception {
+        //Initial
+        String[] options = {"Buat Initial Solution", "Optimasi"};
+
+        int option = JOptionPane.showOptionDialog(null, "Mau ngapain mbak?",
+                "NCIS'S TA",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+        if(option==0){
+            AtomicBoolean repeat = new AtomicBoolean(false);
+            doIt: do {
+                repeat.set(false);
+                JFileChooser j = new JFileChooser("e:");
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel", "xls", "excel");
+                j.setFileFilter(filter);
+                int result = j.showOpenDialog(null);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    Utils.exceptionListener = e -> {
+                        JOptionPane.showMessageDialog(null, "Program Error");
+                    };
+                    Utils.feasibilityListener = hc -> {
+                        JOptionPane.showMessageDialog(null, "Not Feasible " + hc);
+                        repeat.set(true);
+                    };
+
+                    Utils.iterationListener = count -> {
+                        System.out.println("Iteration => " + count);
+                    };
+
+                    if(repeat.get()) continue ;
+                    File opturFile = j.getSelectedFile();
+                    InitialSolutionResult initialSol = Utils.getInitialSolutionResult(opturFile);
+                    String[] options2 = {"Save Yeay", "Jelek Run Lagi"};
+                    Sn sn = new Sn(initialSol.getInitialSolution());
+                    int option2 = JOptionPane.showOptionDialog(null, "Penalty = "+sn.getCandidatePenalty()+" | Gimana mbak?",
+                            "NCIS'S TA",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options2, options2[0]);
+                    if(option2==0){
+                        JFileChooser fileChooserSaveSol = new JFileChooser();
+                        fileChooserSaveSol.setDialogTitle("Specify a file to save");
+                        int userSelection = fileChooserSaveSol.showSaveDialog(null);
+
+                        File fileToSave = null;
+
+                        if (userSelection == JFileChooser.APPROVE_OPTION) {
+                            fileToSave = fileChooserSaveSol.getSelectedFile();
+                        }
+                        FileOutputStream f = new FileOutputStream(fileToSave);
+                        ObjectOutputStream o = new ObjectOutputStream(f);
+                        o.writeObject(initialSol);
+                        o.close();
+                        f.close();
+                        String[] options4 = {"Run Lagi", "Udah"};
+                        int option4 = JOptionPane.showOptionDialog(null, "Udah ke save yaa, jangan lupa dimana nyimpennya tadi.",
+                                "NCIS'S TA",
+                                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options4, options4[0]);
+                        if (option4==0) repeat.set(true);
+                        else System.exit(0);
+                    }else {
+                        repeat.set(true);
+                    }
+                }
+            }while (repeat.get());
+        }
+//        else {
 //            AtomicBoolean repeat = new AtomicBoolean(false);
 //            do {
 //                JOptionPane.showMessageDialog(null, "Pilih optur dulu ya, buat inisisasi SC :)");
@@ -179,149 +178,149 @@ public class Mock {
 ////                    sn.TSAR(1000000, 0.99998D, 1000000, 1, 5000, 500000, 0.1D);
 //                }
 //            }while (repeat.get());
+        }
+
+
+
+//        Commons.exceptionListener = e -> {
+//
+//        };
+//
+//        Commons.feasibilityListener = hc -> {
+//            System.out.println("Not feasibel: " + hc);
+//        };
+//
+//        Commons.iterationListener = count -> {
+//            System.out.println("Iteration count -> " + count);
+//        };
+//
+//        InitialSolutionResult initialSol = Commons.getInitialSolutionResult(new File("C:\\Users\\5216100056\\Desktop\\OpTur (1)\\OpTur7" +
+//                ".xls"));
+//
+//        if(initialSol.getNotFeasibleHc()==null){
+//            System.out.println(initialSol.getInitialSolMatrix());
+//            System.out.println("Time: " + initialSol.getProcessingTime()/1000.0 + " s");
+//            System.out.println("Optur: " + initialSol.getOpturNumber());
+//            System.out.println("Penalty: " + new Sn(initialSol.getInitialSolution()).getPenalty());
+//            Sn sn = new Sn(initialSol.getInitialSolution());
+//            sn.simulatedAnnealingXTab(1000000, 0.99998D, 1000000, 1, 5000);
+////            sn.simulatedAnnealingXTabuSearch(1000000, 0.95D, 1000000, 5000);
+//            int[][] initSol = initialSol.getInitialSolution();
+////            SATABU(initialSol.getInitialSolution());
+//        }else{
+//            System.out.println("HC " + initialSol.getNotFeasibleHc() + " Not Feasible");
 //        }
+
+
+//        Commons.doneListener = initSol -> {
+//            fileChooserSaveSol.setDialogTitle("Specify a file to save");
+//            int userSelection = fileChooserSaveSol.showSaveDialog(jFrame);
 //
+//            File fileToSave = null;
 //
+//            if (userSelection == JFileChooser.APPROVE_OPTION) {
+//                fileToSave = fileChooserSaveSol.getSelectedFile();
+//            }
 //
-////        Commons.exceptionListener = e -> {
-////
-////        };
-////
-////        Commons.feasibilityListener = hc -> {
-////            System.out.println("Not feasibel: " + hc);
-////        };
-////
-////        Commons.iterationListener = count -> {
-////            System.out.println("Iteration count -> " + count);
-////        };
-////
-////        InitialSolutionResult initialSol = Commons.getInitialSolutionResult(new File("C:\\Users\\5216100056\\Desktop\\OpTur (1)\\OpTur7" +
-////                ".xls"));
-////
-////        if(initialSol.getNotFeasibleHc()==null){
-////            System.out.println(initialSol.getInitialSolMatrix());
-////            System.out.println("Time: " + initialSol.getProcessingTime()/1000.0 + " s");
-////            System.out.println("Optur: " + initialSol.getOpturNumber());
-////            System.out.println("Penalty: " + new Sn(initialSol.getInitialSolution()).getPenalty());
-////            Sn sn = new Sn(initialSol.getInitialSolution());
-////            sn.simulatedAnnealingXTab(1000000, 0.99998D, 1000000, 1, 5000);
-//////            sn.simulatedAnnealingXTabuSearch(1000000, 0.95D, 1000000, 5000);
-////            int[][] initSol = initialSol.getInitialSolution();
-//////            SATABU(initialSol.getInitialSolution());
-////        }else{
-////            System.out.println("HC " + initialSol.getNotFeasibleHc() + " Not Feasible");
-////        }
+//            FileOutputStream f = new FileOutputStream(fileToSave);
+//            ObjectOutputStream o = new ObjectOutputStream(f);
+//            o.writeObject(initSol);
+//            o.close();
+//            f.close();
 //
+//            FileInputStream fi = new FileInputStream(fileToSave);
+//            ObjectInputStream oi = new ObjectInputStream(fi);
 //
-////        Commons.doneListener = initSol -> {
-////            fileChooserSaveSol.setDialogTitle("Specify a file to save");
-////            int userSelection = fileChooserSaveSol.showSaveDialog(jFrame);
+//            // Read objects
+//            int[][] sol = (int[][]) oi.readObject();
+//
+//            String[] shiftName = new String[]{"FE", "D3", "D", "N1", "A", "D1", "A1"};
+//            for (int e = -1; e<sol.length; e++){
+//                for (int d = -1; d <sol[0].length; d++){
+//                    if(e==-1&&d==-1) logsArea.append("E\\D\t");
+//                    else if (e==-1) logsArea.append(d + "\t");
+//                    else if (d==-1) logsArea.append(e + "\t");
+//                    else logsArea.append(shiftName[sol[e][d]] + "\t");
+//                }
+//                logsArea.append("\n");
+//            }
+//            vertical.setValue(vertical.getMaximum());
+//
+//            oi.close();
+//            fi.close();
+//        };
+//
+//        jFrame = new JFrame("Nurse Rostering");
+//
+//        fileChooserOpenOptur = new JFileChooser();
+//
+//        fileChooserSaveSol = new JFileChooser();
+//
+//        JPanel jPanel = new JPanel();
+//
+//        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
+//
+//        JPanel left = new JPanel();
+//
+//        left.setLayout(new BoxLayout(left, BoxLayout.PAGE_AXIS));
+//
+////        JButton btnPilihFileOptur = new JButton("Pilih File Optur");
+//
+//        JLabel lblOpturName = new JLabel();
+//
+////        btnPilihFileOptur.addActionListener(e -> {
 ////
-////            File fileToSave = null;
-////
-////            if (userSelection == JFileChooser.APPROVE_OPTION) {
-////                fileToSave = fileChooserSaveSol.getSelectedFile();
-////            }
-////
-////            FileOutputStream f = new FileOutputStream(fileToSave);
-////            ObjectOutputStream o = new ObjectOutputStream(f);
-////            o.writeObject(initSol);
-////            o.close();
-////            f.close();
-////
-////            FileInputStream fi = new FileInputStream(fileToSave);
-////            ObjectInputStream oi = new ObjectInputStream(fi);
-////
-////            // Read objects
-////            int[][] sol = (int[][]) oi.readObject();
-////
-////            String[] shiftName = new String[]{"FE", "D3", "D", "N1", "A", "D1", "A1"};
-////            for (int e = -1; e<sol.length; e++){
-////                for (int d = -1; d <sol[0].length; d++){
-////                    if(e==-1&&d==-1) logsArea.append("E\\D\t");
-////                    else if (e==-1) logsArea.append(d + "\t");
-////                    else if (d==-1) logsArea.append(e + "\t");
-////                    else logsArea.append(shiftName[sol[e][d]] + "\t");
-////                }
-////                logsArea.append("\n");
-////            }
-////            vertical.setValue(vertical.getMaximum());
-////
-////            oi.close();
-////            fi.close();
-////        };
-////
-////        jFrame = new JFrame("Nurse Rostering");
-////
-////        fileChooserOpenOptur = new JFileChooser();
-////
-////        fileChooserSaveSol = new JFileChooser();
-////
-////        JPanel jPanel = new JPanel();
-////
-////        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
-////
-////        JPanel left = new JPanel();
-////
-////        left.setLayout(new BoxLayout(left, BoxLayout.PAGE_AXIS));
-////
-//////        JButton btnPilihFileOptur = new JButton("Pilih File Optur");
-////
-////        JLabel lblOpturName = new JLabel();
-////
-//////        btnPilihFileOptur.addActionListener(e -> {
-//////
-//////        });
-////
-//////        left.add(btnPilihFileOptur);
-////
-////        left.add(lblOpturName);
-////
-////        //right
-////
-////        JPanel right = new JPanel();
-////
-////        left.setBorder(BorderFactory.createBevelBorder(0));
-////        right.setBorder(BorderFactory.createBevelBorder(0));
-////
-////        logsArea = new JTextArea();
-////
-////        logsArea.setEditable(false);
-////        logsArea.setRows(40);
-////        logsArea.setColumns(100);
-////
-////        JScrollPane scroll = new JScrollPane (logsArea,
-////                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-////
-////        vertical = scroll.getVerticalScrollBar();
-////
-////        right.add(scroll);
-////
-////        jPanel.add(left);
-////        jPanel.add(right);
-////
-////        jFrame.add(jPanel);
-////        jFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-////        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-////        jFrame.setVisible(true);
-////
-////        fileChooserOpenOptur.setDialogTitle("Chose Optur File");
-////        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel", "xls", "excel");
-////        fileChooserOpenOptur.setFileFilter(filter);
-////        int result = fileChooserOpenOptur.showOpenDialog(jFrame);
-////        if (result == JFileChooser.APPROVE_OPTION) {
-////            fileOptur = fileChooserOpenOptur.getSelectedFile();
-////            lblOpturName.setText(fileOptur.getName());
-////            try {
-////                Commons.exe();
-////            } catch (ParseException parseException) {
-////                parseException.printStackTrace();
-////            } catch (InvalidFormatException invalidFormatException) {
-////                invalidFormatException.printStackTrace();
-////            } catch (IOException ioException) {
-////                ioException.printStackTrace();
-////            }
-////        }
+////        });
+//
+////        left.add(btnPilihFileOptur);
+//
+//        left.add(lblOpturName);
+//
+//        //right
+//
+//        JPanel right = new JPanel();
+//
+//        left.setBorder(BorderFactory.createBevelBorder(0));
+//        right.setBorder(BorderFactory.createBevelBorder(0));
+//
+//        logsArea = new JTextArea();
+//
+//        logsArea.setEditable(false);
+//        logsArea.setRows(40);
+//        logsArea.setColumns(100);
+//
+//        JScrollPane scroll = new JScrollPane (logsArea,
+//                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+//
+//        vertical = scroll.getVerticalScrollBar();
+//
+//        right.add(scroll);
+//
+//        jPanel.add(left);
+//        jPanel.add(right);
+//
+//        jFrame.add(jPanel);
+//        jFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        jFrame.setVisible(true);
+//
+//        fileChooserOpenOptur.setDialogTitle("Chose Optur File");
+//        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel", "xls", "excel");
+//        fileChooserOpenOptur.setFileFilter(filter);
+//        int result = fileChooserOpenOptur.showOpenDialog(jFrame);
+//        if (result == JFileChooser.APPROVE_OPTION) {
+//            fileOptur = fileChooserOpenOptur.getSelectedFile();
+//            lblOpturName.setText(fileOptur.getName());
+//            try {
+//                Commons.exe();
+//            } catch (ParseException parseException) {
+//                parseException.printStackTrace();
+//            } catch (InvalidFormatException invalidFormatException) {
+//                invalidFormatException.printStackTrace();
+//            } catch (IOException ioException) {
+//                ioException.printStackTrace();
+//            }
+//        }
 //    }
 
     private static void opt() {

@@ -1,10 +1,9 @@
 package org.cis.optur.auto;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.cis.optur.engine.commons.Commons;
+import org.cis.optur.engine.commons.Utils;
 import org.cis.optur.engine.commons.InitialSolutionResult;
 import org.cis.optur.engine.commons.OptimationResult;
-import org.cis.optur.engine.commons.Sn;
 import org.cis.optur.optimation.TSXSA;
 import org.cis.optur.optimation.TSXTSAR;
 
@@ -34,7 +33,7 @@ public class TSATSAR {
     static final String RESULT_FOLDER = "C:\\Users\\5216100056\\Desktop\\OpTur (1)\\Optur5";
 
     public static void main(String[] args) throws ParseException, InvalidFormatException, IOException, ClassNotFoundException {
-        Commons.initSC(new File(XLS_FILE_PATH));
+        Utils.initSC(new File(XLS_FILE_PATH));
         File solFile = new File(INIT_SOL_FILE_PATH);
         FileInputStream fi = new FileInputStream(solFile);
         ObjectInputStream oi = new ObjectInputStream(fi);
@@ -65,13 +64,13 @@ public class TSATSAR {
             System.out.println("Start Scenario " + (s+1));
             for (int i = 0; i < 10; i++) {
                 int[][] temp = new int[initialSol.getInitialSolution().length][initialSol.getInitialSolution()[0].length];
-                Commons.copyArray(initialSol.getInitialSolution(), temp);
+                Utils.copySolutionMatrix(initialSol.getInitialSolution(), temp);
 
                 System.out.println("Start Percobaan " + (i+1));
                 OptimationResult optimationResult;
                 if(sps[s].b==0){
                     TSXSA tsxsa = new TSXSA(temp);
-                    optimationResult = tsxsa.TSA2(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000);
+                    optimationResult = tsxsa.getOptimationResult(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000);
                 }else {
                     TSXTSAR tsxtsar = new TSXTSAR(temp);
                     optimationResult = tsxtsar.getOptimationResult(sps[s].TO, sps[s].a, sps[s].iterasi,sps[s].TL,5000, sps[s].b, sps[s].Nb);

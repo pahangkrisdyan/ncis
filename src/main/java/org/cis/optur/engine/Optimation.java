@@ -13,9 +13,9 @@ public class Optimation {
     private int penaltyRecordRange;
 
     public Optimation(Sn initialSolution, int numberOfIterations, int penaltyRecordRange) {
-        this.initialSolution = new Sn(initialSolution.getSolution());
-        this.bestSolution = new Sn(Utils.getCopyOf(initialSolution.getSolution()));
-        this.currentSolution = new Sn(Utils.getCopyOf(initialSolution.getSolution()));
+        this.initialSolution = new Sn(initialSolution.getSolutionMatrix());
+        this.bestSolution = new Sn(Utils.getCopyOf(initialSolution.getSolutionMatrix()));
+        this.currentSolution = new Sn(Utils.getCopyOf(initialSolution.getSolutionMatrix()));
         this.penalties = new LinkedList<>();
         this.numberOfIterations = numberOfIterations;
         this.penaltyRecordRange = penaltyRecordRange;
